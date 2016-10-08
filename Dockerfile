@@ -1,6 +1,8 @@
 FROM openjdk:7-jdk
 MAINTAINER Florian JUDITH <florian.judith.b@gmail.com>
 
+ENV SQUASH_TM_VERSION=1.14.0
+
 RUN apt-get -y update && apt-get -y install \
 	sudo \
 	supervisor \

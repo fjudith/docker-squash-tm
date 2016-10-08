@@ -21,6 +21,8 @@
 #
 
 # if we're linked to MySQL and thus have credentials already, let's use them
+#set -e
+
 if [[ -v MYSQL_ENV_GOSU_VERSION ]]; then
     : ${DB_TYPE='mysql'}
     : ${DB_USERNAME:=${MYSQL_ENV_MYSQL_USER:-root}}
@@ -34,7 +36,7 @@ if [[ -v MYSQL_ENV_GOSU_VERSION ]]; then
     echo 'Using MysQL'
     if ! mysql -h mysql -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME -e "SELECT 1 FROM information_schema.tables WHERE table_schema = 'squashtm' AND table_name = 'ISSUE';" | grep 1 ; then
         echo 'Initializing MySQL database'
-        mysql -h mysql -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME < ../database-scripts/mysql-full-install-version-1.14.0.RELEASE.sql
+        mysql -h mysql -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME < ../database-scripts/mysql-full-install-version-$SQUASH_TM_VERSION.RELEASE.sql
     else
         echo 'Database already initialized'
     fi
@@ -60,9 +62,9 @@ if [[ -v POSTGRES_ENV_GOSU_VERSION ]]; then
     : ${DB_URL="jdbc:postgresql://postgres:5432/$DB_NAME"}
 
     echo 'Using PostgreSQL'
-    if ! psql postgresql://$POSTGRES_ENV_POSTGRES_USER:$POSTGRES_ENV_POSTGRES_PASSWORD@postgres/$POSTGRES_ENV_POSTGRES_DB -c "SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'issue';" | grep 1 ; then
+    if ! psql postgresql://$DB_USERNAME:$DB_PASSWORD@postgres/$DB_NAME -c "SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'issue';" | grep 1 ; then
         echo 'Initializing PostgreSQL database'
-        psql postgresql://$POSTGRES_ENV_POSTGRES_USER:$POSTGRES_ENV_POSTGRES_PASSWORD@postgres/$POSTGRES_ENV_POSTGRES_DB -f ../database-scripts/postgresql-full-install-version-1.14.0.RELEASE.sql
+        psql postgresql://$DB_USERNAME:$DB_PASSWORD@postgres/$DB_NAME -f ../database-scripts/postgresql-full-install-version-$SQUASH_TM_VERSION.RELEASE.sql
     else
         echo 'Database already initialized'
     fi
