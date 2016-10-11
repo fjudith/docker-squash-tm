@@ -1,0 +1,11 @@
+<Context>
+  <Environment name="logging.config" value="file:/usr/share/squash-tm/conf/log4j.properties" type="java.lang.String" override="false"/>
+  <Environment name="spring.config.location" value="file:/usr/share/squash-tm/conf/squash.tm.cfg.properties" type="java.lang.String" override="false"/>
+  <Environment name="spring.profiles.active" value="@@DB_TYPE@@" type="java.lang.String" override="false"/>
+  <Resources>
+    <PreResources className="org.apache.catalina.webresources.DirResourceSet" 
+                  base="/usr/share/squash-tm/plugins"
+                  internalPath="/"
+                  webAppMount="/WEB-INF/lib" />
+  </Resources>
+</Context>

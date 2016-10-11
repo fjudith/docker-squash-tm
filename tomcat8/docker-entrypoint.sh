@@ -23,6 +23,31 @@
 # if we're linked to MySQL and thus have credentials already, let's use them
 #set -e
 
+function cfg_replace_option {
+  grep "$1" "$3" > /dev/null
+  if [ $? -eq 0 ]; then
+    # replace option
+    echo "replacing option  $1=$2  in  $3"
+    sed -i "s#^\($1\s*=\s*\).*\$#\1$2#" $3
+    if (( $? )); then
+      echo "cfg_replace_option failed"
+      exit 1
+    fi
+  else
+    # add option if it does not exist
+    echo "adding option  $1=$2  in  $3"
+    echo "$1=$2" >> $3
+  fi
+}
+
+SQUAH_TM_CFG_PROPERTIES=/usr/share/squash-tm/conf/squash.tm.cfg.properties
+
+cd /usr/share/squash-tm/bin
+
+
+
+
+# if we're linked to MySQL and thus have credentials already, let's use them
 if [[ -v MYSQL_ENV_GOSU_VERSION ]]; then
     : ${DB_TYPE='mysql'}
     : ${DB_USERNAME:=${MYSQL_ENV_MYSQL_USER:-root}}
@@ -48,6 +73,18 @@ if [[ -v MYSQL_ENV_GOSU_VERSION ]]; then
         echo >&2 '  (Also of interest might be DB_USERNAME and DB_NAME.)'
         exit 1
     fi
+
+    # Implement database configuration in /usr/share/squash-tm/conf/squash.tm.cfg.properties
+    # https://bitbucket.org/nx/squashtest-tm/wiki/WarDeploymentGuide
+    cfg_replace_option spring.datasource.url $DB_URL $SQUAH_TM_CFG_PROPERTIES
+    cfg_replace_option spring.datasource.username $DB_USERNAME $SQUAH_TM_CFG_PROPERTIES
+    cfg_replace_option spring.datasource.password $DB_PASSWORD $SQUAH_TM_CFG_PROPERTIES
+    cfg_replace_option squash.path.root /usr/share/squash-tm $SQUAH_TM_CFG_PROPERTIES
+    cfg_replace_option spring.profiles.active $DB_TYPE $SQUAH_TM_CFG_PROPERTIES
+    
+    # Deploy webapp's context
+    #https://bitbucket.org/nx/squashtest-tm/wiki/WarDeploymentGuide
+    sed -i "s#@@DB_TYPE@@#$DB_TYPE#" /usr/local/tomcat/conf/Catalina/localhost/squash-tm.xml
 fi
 
 # if we're linked to PostgreSQL and thus have credentials already, let's use them
@@ -76,6 +113,18 @@ if [[ -v POSTGRES_ENV_GOSU_VERSION ]]; then
         echo >&2 '  (Also of interest might be DB_USERNAME and DB_NAME.)'
         exit 1
     fi
+
+    # Implement database configuration in /usr/share/squash-tm/conf/squash.tm.cfg.properties
+    # https://bitbucket.org/nx/squashtest-tm/wiki/WarDeploymentGuide
+    cfg_replace_option spring.datasource.url $DB_URL $SQUAH_TM_CFG_PROPERTIES
+    cfg_replace_option spring.datasource.username $DB_USERNAME $SQUAH_TM_CFG_PROPERTIES
+    cfg_replace_option spring.datasource.password $DB_PASSWORD $SQUAH_TM_CFG_PROPERTIES
+    cfg_replace_option squash.path.root /usr/share/squash-tm $SQUAH_TM_CFG_PROPERTIES
+    cfg_replace_option spring.profiles.active $DB_TYPE $SQUAH_TM_CFG_PROPERTIES
+
+    # Deploy webapp's context
+    # https://bitbucket.org/nx/squashtest-tm/wiki/WarDeploymentGuide
+    sed -i "s#@@DB_TYPE@@#$DB_TYPE#" /usr/local/tomcat/conf/Catalina/localhost/squash-tm.xml
 fi
 
 
@@ -124,7 +173,7 @@ fi
 
 echo "done";
 
-# Create logs and tmp directories if necessary
+# Create logs , tmp and plugins directories if necessary
 if [ ! -e "$LOG_DIR" ]; then
     mkdir $LOG_DIR
 fi
@@ -132,6 +181,7 @@ fi
 if [ ! -e "$TMP_DIR" ]; then
     mkdir $TMP_DIR
 fi
+
 
 # Tests if the version is high enough
 echo -n "checking version... ";
@@ -150,9 +200,35 @@ echo  "done";
 
 
 # Let's go !
-echo "$0 : starting Squash TM... ";
+#echo "$0 : starting Squash TM... ";
 
-export _JAVA_OPTIONS="-Dspring.datasource.url=${DB_URL} -Dspring.datasource.username=${DB_USERNAME} -Dspring.datasource.password=${DB_PASSWORD} -Duser.language=${SQUASH_TM_LANGUAGE}"
-DAEMON_ARGS="${JAVA_ARGS} -Djava.io.tmpdir=${TMP_DIR} -Dlogging.dir=${LOG_DIR} -jar ${BUNDLES_DIR}/${JAR_NAME} --spring.profiles.active=${DB_TYPE} --spring.config.location=${CONF_DIR}/squash.tm.cfg.properties --logging.config=${CONF_DIR}/log4j.properties --squash.path.bundles-path=${BUNDLES_DIR} --squash.path.plugins-path=${PLUGINS_DIR} --hibernate.search.default.indexBase=${LUCENE_DIR} --server.port=${HTTP_PORT} --server.tomcat.basedir=${TOMCAT_HOME} "
+#export _JAVA_OPTIONS="-Dspring.datasource.url=${DB_URL} -Dspring.datasource.username=${DB_USERNAME} -Dspring.datasource.password=${DB_PASSWORD} -Duser.language=${SQUASH_TM_LANGUAGE}"
+#DAEMON_ARGS="${JAVA_ARGS} -Djava.io.tmpdir=${TMP_DIR} -Dlogging.dir=${LOG_DIR} -jar ${BUNDLES_DIR}/${JAR_NAME} --spring.profiles.active=${DB_TYPE} --spring.config.location=${CONF_DIR}/squash.tm.cfg.properties --logging.config=${CONF_DIR}/log4j.properties --squash.path.bundles-path=${BUNDLES_DIR} --squash.path.plugins-path=${PLUGINS_DIR} --hibernate.search.default.indexBase=${LUCENE_DIR} --server.port=${HTTP_PORT} --server.tomcat.basedir=${TOMCAT_HOME} "
 
-exec java ${DAEMON_ARGS}
+# exec java ${DAEMON_ARGS}
+
+cd $CATALINA_HOME
+
+if [[ -v REVERSE_PROXY_HOST ]]; then
+    echo "Setting reverse proxy for URL:\"$REVERSE_PROXY_PROTOCOL://$REVERSE_PROXY_HOST:$REVERSE_PROXY_PORT\""
+
+    REVERSE_PROXY_PROTOCOL=${REVERSE_PROXY_PROTOCOL:-https}
+    REVERSE_PROXY_PORT=${REVERSE_PROXY_PORT:-443}
+
+    xmlstarlet ed \
+    -P -S -L \
+    -i '/Server/Service/Connector[@port="8080"]' -t attr -n useBodyEncodingForURI -v 'true' \
+    -i '/Server/Service/Connector[@port="8080"]' -t attr -n compression -v 'on' \
+    -i '/Server/Service/Connector[@port="8080"]' -t attr -n compressableMimeType -v 'text/html,text/xml,text/plain,text/css,application/json,application/javascript,application/x-javascript' \
+    -i '/Server/Service/Connector[@port="8080"]' -t attr -n secure -v 'true' \
+    -i '/Server/Service/Connector[@port="8080"]' -t attr -n scheme -v "$REVERSE_PROXY_PROTOCOL" \
+    -i '/Server/Service/Connector[@port="8080"]' -t attr -n proxyName -v "$REVERSE_PROXY_HOST" \
+    -i '/Server/Service/Connector[@port="8080"]' -t attr -n proxyPort -v "$REVERSE_PROXY_PORT" \
+    $CATALINA_HOME/conf/server.xml
+fi
+
+echo
+echo 'Squash TM init process complete; ready for start up.'
+echo
+
+catalina.sh run
