@@ -2,7 +2,7 @@
 Squash TM is the test repository manager found in the open source Squash toolkit. It enables the management of requirements, test cases and campaigns execution in a multiproject context.
 
 # Description
-The Dockerfile builds from "openjdk:7jdk" see https://hub.docker.com/_/openjdk/
+The Dockerfile builds from "Tomcat:8-jre7" see https://hub.docker.com/_/tomcat/
 
 Only `startup.sh` is customized to allow seemless integration with external database as long as the link alias is `mysql` or `postgres`.
 
@@ -46,13 +46,18 @@ If you use this image in production, you'll probably want to persist the followi
 /usr/share/squash-tm/plugins                     # Plugins directory
 ```
 
-#### Database
+#### Environment variables
 Default `DB_TYPE` is H2
-The following environmnet variables allows to change for MySQL or PostgreSQL.
+The following environment variables allows to change for MySQL or PostgreSQL.
 * **DB_TYPE**: Database type, one of h2, mysql, postgresql; default=`h2`
 * **DB_URL**: DataBase URL; default=`jdbc:h2:../data/squash-tm`
 * **DB_USERNAME**: Database username; default=`sa`
 * **DB_PASSWORD**: Database password; default=`sa`
+
+The following envionment variables enable the support of  reverse-proxy (e.g. haproxy with https frontend)
+* **REVERSE_PROXY_HOST**: Fully Qualified name _(e.g. squashtm.example.com)_
+* **REVERSE_PROXY_PORT**: Port listening at de reverse-proxy side; default=`443`
+* **REVERSE_PROXY_PROTOCOL**: _http_ or _https_; default=`https` 
 
 ### Deployment using PostgreSQL
 Database is created by the database container and automatically populated by the application container on first run.
@@ -75,7 +80,7 @@ docker run -it -d --name=squash-tm \
 fjudith/squash-tm
 ```
 
-Wait 2-3 minutes the time for Squash-TM to initialize. then login to http://localhost:32760/squash 
+Wait 2-3 minutes the time for Squash-TM to initialize. then login to http://localhost:32760/squash-tm
 
 ### Deployment using MySQL
 Database is created by the database container and automatically populated by the application container on first run.
@@ -97,7 +102,7 @@ docker run -it -d --name=squash-tm \
 fjudith/squash-tm
 ```
 
-Wait 2-3 minutes the time for Squash-TM to initialize. then login to http://localhost:32760/squash 
+Wait 2-3 minutes the time for Squash-TM to initialize. then login to http://localhost:32760/squash-tm
 
 ### References
 
