@@ -87,7 +87,7 @@ fi
 
 # Default variables
 JAR_NAME="squash-tm.war"  # Java main library
-HTTP_PORT=8080                             # Port for HTTP connector (default 8080; disable with -1)
+HTTP_PORT=${HTTP_PORT:-8080}               # Port for HTTP connector (default 8080; disable with -1)
 # Directory variables
 TMP_DIR=../tmp                             # Tmp and work directory
 BUNDLES_DIR=../bundles                     # Bundles directory
