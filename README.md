@@ -9,10 +9,10 @@ Only `startup.sh` is customized to allow seemless integration with external data
 # Quick Start
 Run the Squash-TM image:
 ```
-docker run --name='squash-tm' -it -rm -p 8080:8080 fjudith/squash-tm
+docker run --name='squash-tm' -it --rm -p 8080:8080 fjudith/squash-tm
 ```
 
-NOTE: Please allow a few minutes for the applicaton to start, especially if popylating the database for the first time. If you want to make sur that everything went fine, watch the log:
+NOTE: Please allow a few minutes for the applicaton to start, especially if populating the database for the first time. If you want to make sur that everything went fine, watch the log:
 
 ```
 docker exec -it squash-tm bash
@@ -82,7 +82,61 @@ fjudith/squash-tm
 
 Wait 2-3 minutes the time for Squash-TM to initialize. then login to http://localhost:32760/squash-tm
 
-### Deployment using MySQL
+#### Docker-Compose (english language)
+```
+squash-tm-pg:
+  environment:
+    POSTGRES_DB: squashtm
+    POSTGRES_PASSWORD: Ch4ng3M3
+    POSTGRES_USER: squashtm
+  image: postgres
+  volumes:
+  - squash-tm-db:/var/lib/postgresql
+
+squash-tm:
+  ports:
+  - 32760:8080/tcp
+  image: fjudith/squash-tm
+  links:
+  - squash-tm-pg:postgres
+  volumes:
+  - squash-tm-tmp:/usr/share/squash-tm/tmp
+  - squash-tm-bundles:/usr/share/squash-tm/bundles
+  - squash-tm-conf:/usr/share/squash-tm/conf
+  - squash-tm-logs:/usr/share/squash-tm/logs
+  - squash-tm-jettyhome:/usr/share/squash-tm/jettyhome
+  - squash-tm-luceneindexes:/usr/share/squash-tm/luceneindexes
+  - squash-tm-plugins:/usr/share/squash-tm/plugins
+```
+
+#### Docker-Compose (french language)
+```
+squash-tm-pg:
+  environment:
+    POSTGRES_DB: squashtm
+    POSTGRES_PASSWORD: Ch4ng3M3
+    POSTGRES_USER: squashtm
+  image: fjudith/postgres-fr
+  volumes:
+  - squash-tm-db:/var/lib/postgresql
+
+squash-tm:
+  ports:
+  - 32760:8080/tcp
+  image: fjudith/squash-tm:fr
+  links:
+  - squash-tm-pg:postgres
+  volumes:
+  - squash-tm-tmp:/usr/share/squash-tm/tmp
+  - squash-tm-bundles:/usr/share/squash-tm/bundles
+  - squash-tm-conf:/usr/share/squash-tm/conf
+  - squash-tm-logs:/usr/share/squash-tm/logs
+  - squash-tm-jettyhome:/usr/share/squash-tm/jettyhome
+  - squash-tm-luceneindexes:/usr/share/squash-tm/luceneindexes
+  - squash-tm-plugins:/usr/share/squash-tm/plugins
+```
+
+### Deployment using MySQL (Unstable)
 Database is created by the database container and automatically populated by the application container on first run.
 
 ```bash
@@ -108,3 +162,5 @@ Wait 2-3 minutes the time for Squash-TM to initialize. then login to http://loca
 
 * http://www.squashtest.org
 * https://github.com/Logicify/docker-squash-tm
+* https://bitbucket.org/nx/squashtest-tm/wiki/WarDeploymentGuide
+* https://confluence.atlassian.com/bitbucketserver/securing-bitbucket-server-behind-haproxy-using-ssl-779303273.html

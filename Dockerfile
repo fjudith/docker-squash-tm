@@ -1,32 +1,38 @@
-FROM openjdk:7-jdk
+FROM tomcat:8-jre7
 MAINTAINER Florian JUDITH <florian.judith.b@gmail.com>
 
 ARG SQUASH_TM_LANGUAGE='en'
 
-ENV SQUASH_TM_VERSION=1.14.0
+ENV TERM=xterm
+
+ENV SQUASH_TM_VERSION=1.14.2
+ENV CATALINA_HOME /usr/local/tomcat
+ENV JAVA_OPTS="-Xmx1024m -XX:MaxPermSize=256m"
 
 RUN apt-get -y update && apt-get -y install \
-	sudo \
-	supervisor \
 	postgresql-client \
 	mysql-client \
+	xmlstarlet \
 	nano 
 
-COPY conf/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-RUN mkdir -p /var/log/supervisor
+RUN mkdir -p /usr/local/tomcat/conf/Catalina/localhost
+
+COPY conf/squash-tm.xml /usr/local/tomcat/conf/Catalina/localhost/squash-tm.xml
 
 COPY conf/install_squash-tm.sh /tmp/install_squash-tm.sh
 RUN chmod +x /tmp/install_squash-tm.sh
 RUN exec /tmp/install_squash-tm.sh
 
-COPY startup.sh /usr/share/squash-tm/bin/startup.sh
-RUN chmod +x /usr/share/squash-tm/bin/startup.sh
+# Copy WAR to webapps
+RUN cp /usr/share/squash-tm/bundles/squash-tm.war $CATALINA_HOME/webapps/
+
+COPY docker-entrypoint.sh /usr/share/squash-tm/bin/docker-entrypoint.sh
+RUN chmod +x /usr/share/squash-tm/bin/docker-entrypoint.sh
 
 COPY conf/log4j.properties /usr/share/squash-tm/bin/conf
 
 EXPOSE 8080
 
-WORKDIR /usr/share/squash-tm/bin
-
-CMD ["./startup.sh"]
-# CMD /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf -n
+WORKDIR $CATALINA_HOME
+ENTRYPOINT ["/usr/share/squash-tm/bin/docker-entrypoint.sh"]
+CMD ["catalina.sh", "run"]
