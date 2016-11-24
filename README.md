@@ -4,7 +4,10 @@ Squash TM is the test repository manager found in the open source Squash toolkit
 # Description
 The Dockerfile builds from "Tomcat:8-jre7" see https://hub.docker.com/_/tomcat/
 
-Only `startup.sh` is customized to allow seemless integration with external database as long as the link alias is `mysql` or `postgres`.
+# Roadmap
+
+* [X] Implement support Reverse-proxy via environment variable.
+* [X] Fix container restart issue when Reverse-proxy configured.
 
 # Quick Start
 Run the Squash-TM image:
@@ -124,7 +127,7 @@ squash-tm:
   ports:
   - 32760:8080/tcp
   image: fjudith/squash-tm:fr
-  links:
+  links:RE
   - squash-tm-pg:postgres
   volumes:
   - squash-tm-tmp:/usr/share/squash-tm/tmp

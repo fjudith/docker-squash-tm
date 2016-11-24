@@ -210,21 +210,37 @@ echo  "done";
 cd $CATALINA_HOME
 
 if [[ -v REVERSE_PROXY_HOST ]]; then
-    echo "Setting reverse proxy for URL:\"$REVERSE_PROXY_PROTOCOL://$REVERSE_PROXY_HOST:$REVERSE_PROXY_PORT\""
 
     REVERSE_PROXY_PROTOCOL=${REVERSE_PROXY_PROTOCOL:-https}
     REVERSE_PROXY_PORT=${REVERSE_PROXY_PORT:-443}
 
-    xmlstarlet ed \
-    -P -S -L \
-    -i '/Server/Service/Connector[@port="8080"]' -t attr -n useBodyEncodingForURI -v 'true' \
-    -i '/Server/Service/Connector[@port="8080"]' -t attr -n compression -v 'on' \
-    -i '/Server/Service/Connector[@port="8080"]' -t attr -n compressableMimeType -v 'text/html,text/xml,text/plain,text/css,application/json,application/javascript,application/x-javascript' \
-    -i '/Server/Service/Connector[@port="8080"]' -t attr -n secure -v 'true' \
-    -i '/Server/Service/Connector[@port="8080"]' -t attr -n scheme -v "$REVERSE_PROXY_PROTOCOL" \
-    -i '/Server/Service/Connector[@port="8080"]' -t attr -n proxyName -v "$REVERSE_PROXY_HOST" \
-    -i '/Server/Service/Connector[@port="8080"]' -t attr -n proxyPort -v "$REVERSE_PROXY_PORT" \
-    $CATALINA_HOME/conf/server.xml
+    if grep -q $REVERSE_PROXY_HOST $CATALINA_HOME/conf/server.xml ; then
+        echo "Updating reverse proxy for URL:\"$REVERSE_PROXY_PROTOCOL://$REVERSE_PROXY_HOST:$REVERSE_PROXY_PORT\""
+
+        xmlstarlet ed \
+        -P -S -L \
+        -u '/Server/Service/Connector[@port="8080"]/@useBodyEncodingForURI' -v 'true' \
+        -u '/Server/Service/Connector[@port="8080"]/@compression' -v 'on' \
+        -u '/Server/Service/Connector[@port="8080"]/@compressableMimeType' -v 'text/html,text/xml,text/plain,text/css,application/json,application/javascript,application/x-javascript' \
+        -u '/Server/Service/Connector[@port="8080"]/@secure' -v 'true' \
+        -u '/Server/Service/Connector[@port="8080"]/@scheme' -v "$REVERSE_PROXY_PROTOCOL" \
+        -u '/Server/Service/Connector[@port="8080"]/@proxyName' -v "$REVERSE_PROXY_HOST" \
+        -u '/Server/Service/Connector[@port="8080"]/@proxyPort' -v "$REVERSE_PROXY_PORT" \
+        $CATALINA_HOME/conf/server.xml
+    else
+        echo "Setting reverse proxy for URL:\"$REVERSE_PROXY_PROTOCOL://$REVERSE_PROXY_HOST:$REVERSE_PROXY_PORT\""
+
+        xmlstarlet ed \
+        -P -S -L \
+        -i '/Server/Service/Connector[@port="8080"]' -t attr -n useBodyEncodingForURI -v 'true' \
+        -i '/Server/Service/Connector[@port="8080"]' -t attr -n compression -v 'on' \
+        -i '/Server/Service/Connector[@port="8080"]' -t attr -n compressableMimeType -v 'text/html,text/xml,text/plain,text/css,application/json,application/javascript,application/x-javascript' \
+        -i '/Server/Service/Connector[@port="8080"]' -t attr -n secure -v 'true' \
+        -i '/Server/Service/Connector[@port="8080"]' -t attr -n scheme -v "$REVERSE_PROXY_PROTOCOL" \
+        -i '/Server/Service/Connector[@port="8080"]' -t attr -n proxyName -v "$REVERSE_PROXY_HOST" \
+        -i '/Server/Service/Connector[@port="8080"]' -t attr -n proxyPort -v "$REVERSE_PROXY_PORT" \
+        $CATALINA_HOME/conf/server.xml
+    fi
 fi
 
 echo
