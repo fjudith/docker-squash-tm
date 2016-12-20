@@ -1,3 +1,5 @@
+[![](https://images.microbadger.com/badges/image/fjudith/squash-tm.svg)](https://microbadger.com/images/fjudith/squash-tm "Get your own image badge on microbadger.com")
+
 # Introduction
 Squash TM is the test repository manager found in the open source Squash toolkit. It enables the management of requirements, test cases and campaigns execution in a multiproject context.
 
