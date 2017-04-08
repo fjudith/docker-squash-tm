@@ -1,5 +1,5 @@
 <Context>
-  <Environment name="logging.config" value="file:/usr/share/squash-tm/conf/log4j.properties" type="java.lang.String" override="false"/>
+  <Environment name="logging.config" value="file:/usr/share/squash-tm/conf/log4j2.xml" type="java.lang.String" override="false"/>
   <Environment name="spring.config.location" value="file:/usr/share/squash-tm/conf/squash.tm.cfg.properties" type="java.lang.String" override="false"/>
   <Environment name="spring.profiles.active" value="@@DB_TYPE@@" type="java.lang.String" override="false"/>
   <Resources>

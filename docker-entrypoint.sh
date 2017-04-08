@@ -66,9 +66,10 @@ if [[ -v MYSQL_ENV_GOSU_VERSION ]]; then
         echo 'Database already initialized'
     fi
 
-    echo 'Upgrading MysQL'
-    mysql -h mysql -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME < ../database-scripts/mysql-upgrade-to-$SQUASH_TM_VERSION.RELEASE.sql
-
+    echo 'Updrading MysQL'
+    if [[ -f "../database-scripts/mysql-upgrade-to-$SQUASH_TM_VERSION.sql" ]]; then
+        mysql -h mysql -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME < ../database-scripts/mysql-upgrade-to-$SQUASH_TM_VERSION.sql
+    fi
 
     if [ -z "$DB_PASSWORD" ]; then
         echo >&2 'error: missing required DB_PASSWORD environment variable'
@@ -88,7 +89,8 @@ if [[ -v MYSQL_ENV_GOSU_VERSION ]]; then
     
     # Deploy webapp's context
     #https://bitbucket.org/nx/squashtest-tm/wiki/WarDeploymentGuide
-    sed -i "s#@@DB_TYPE@@#$DB_TYPE#" /usr/local/tomcat/conf/Catalina/localhost/squash-tm.xml
+    sed -i "s#@@DB_TYPE@@#$DB_TYPE#g" /usr/local/tomcat/conf/Catalina/localhost/squash-tm.xml
+    sed -i "s#@@DB_URL@@#$DB_URL#g" /usr/local/tomcat/conf/Catalina/localhost/squash-tm.xml
 fi
 
 # if we're linked to PostgreSQL and thus have credentials already, let's use them
@@ -110,8 +112,10 @@ if [[ -v POSTGRES_ENV_GOSU_VERSION ]]; then
         echo 'Database already initialized'
     fi
 
-    echo 'Upgrading PostgreSQL'
-    psql postgresql://$DB_USERNAME:$DB_PASSWORD@postgres/$DB_NAME -f ../database-scripts/postgresql-upgrade-to-$SQUASH_TM_VERSION.RELEASE.sql
+    echo 'Updrading PostgreSQL'
+    if [[ -f "../database-scripts/postgresql-upgrade-to-$SQUASH_TM_VERSION.sql" ]]; then
+        psql postgresql://$DB_USERNAME:$DB_PASSWORD@postgres/$DB_NAME -f ../database-scripts/postgresql-upgrade-to-$SQUASH_TM_VERSION.sql
+    fi
 
     if [ -z "$DB_PASSWORD" ]; then
         echo >&2 'error: missing required DB_PASSWORD environment variable'
@@ -131,9 +135,55 @@ if [[ -v POSTGRES_ENV_GOSU_VERSION ]]; then
 
     # Deploy webapp's context
     # https://bitbucket.org/nx/squashtest-tm/wiki/WarDeploymentGuide
-    sed -i "s#@@DB_TYPE@@#$DB_TYPE#" /usr/local/tomcat/conf/Catalina/localhost/squash-tm.xml
+    sed -i "s#@@DB_TYPE@@#$DB_TYPE#g" /usr/local/tomcat/conf/Catalina/localhost/squash-tm.xml
+    sed -i "s#@@DB_URL@@#$DB_URL#g" /usr/local/tomcat/conf/Catalina/localhost/squash-tm.xml
 fi
 
+# if we're enabling LDAP or Active Directory, Let's update Squash-TM properties file
+if [ $LDAP_ENABLED = "true" ]; then
+	if [[ "$LDAP_PROVIDER" = "ldap" ]]; then
+		# Default
+    	LDAP_PROVIDER=${LDAP_PROVIDER:-'ldap'}
+    	LDAP_URL=${LDAP_URL:-'ldap://example.com:389'}
+    	LDAP_SECURITY_MANAGERDN=${LDAP_SECURITY_MANAGERDN:-'ldapuser@example.com'}
+    	LDAP_SECURITY_MANAGERPASSWORD=${LDAP_SECURITY_MANAGERPASSWORD:-'password'}
+    	#LDAP_USER_DNPATTERNS=${LDAP_USER_DNPATTERNS:-uid={0},ou=people}
+    	#LDAP_USER_SEARCHFILTER=${LDAP_USER_SEARCHFILTER:-'(&(objectclass\=user)(userAccountControl\:1.2.840.113556.1.4.803\:\=512))'}
+    	#LDAP_USER_SEARCHBASE=${LDAP_USER_SEARCHBASE:-(uid={0})}
+    	LDAP_FETCH_ATTRIBUTES=${LDAP_FETCH_ATTRIBUTES:-true}
+
+    	cfg_replace_option authentication.provider "$LDAP_PROVIDER" $SQUAH_TM_CFG_PROPERTIES
+    	cfg_replace_option authentication.ldap.server.url "$LDAP_URL" $SQUAH_TM_CFG_PROPERTIES
+    	cfg_replace_option authentication.ldap.server.managerDn "$LDAP_SECURITY_MANAGERDN" $SQUAH_TM_CFG_PROPERTIES
+    	cfg_replace_option authentication.ldap.server.managerPassword "$LDAP_SECURITY_MANAGERPASSWORD" $SQUAH_TM_CFG_PROPERTIES
+    
+    	if [ -v LDAP_USER_DNPATTERNS ]; then
+    		cfg_replace_option authentication.ldap.user.dnPatterns "$LDAP_USER_DNPATTERNS" $SQUAH_TM_CFG_PROPERTIES
+    	fi
+    
+    	if [ -v LDAP_USER_SEARCHBASE ]; then
+    		cfg_replace_option authentication.ldap.user.searchBase "$LDAP_USER_SEARCHBASE" $SQUAH_TM_CFG_PROPERTIES
+    		cfg_replace_option authentication.ldap.user.searchFilter "$LDAP_USER_SEARCHFILTER" $SQUAH_TM_CFG_PROPERTIES
+    	fi
+
+    	cfg_replace_option authentication.ldap.user.fetchAttributes "$LDAP_FETCH_ATTRIBUTES" $SQUAH_TM_CFG_PROPERTIES
+    fi
+
+    if [[ "$LDAP_PROVIDER" = "ad.ldap" ]]; then
+    	# Default
+    	LDAP_PROVIDER=${LDAP_PROVIDER:-'ad.ldap'}
+    	LDAP_URL=${LDAP_URL:-'ldap://example.com:389'}
+    	AD_DOMAIN=${AD_DOMAIN:-'example.com'}
+    	# LDAP_USER_SEARCHFILTER=${LDAP_USER_SEARCHFILTER:-(&(objectClass=user)(userPrincipalName={0})}
+    	# LDAP_USER_SEARCHBASE=${LDAP_USER_SEARCHBASE:-(uid={0})}
+
+    	cfg_replace_option authentication.provider "$LDAP_PROVIDER" $SQUAH_TM_CFG_PROPERTIES
+    	cfg_replace_option authentication.ad.server.url "$LDAP_URL" $SQUAH_TM_CFG_PROPERTIES
+    	cfg_replace_option authentication.ad.server.domain "$AD_DOMAIN" $SQUAH_TM_CFG_PROPERTIES
+    	cfg_replace_option authentication.ad.user.searchBase "$LDAP_USER_SEARCHBASE" $SQUAH_TM_CFG_PROPERTIES
+    	cfg_replace_option authentication.ad.user.searchFilter "$LDAP_USER_SEARCHFILTER" $SQUAH_TM_CFG_PROPERTIES
+    fi
+fi
 
 #That script will :
 #- check that the java environnement exists,
@@ -217,21 +267,37 @@ echo  "done";
 cd $CATALINA_HOME
 
 if [[ -v REVERSE_PROXY_HOST ]]; then
-    echo "Setting reverse proxy for URL:\"$REVERSE_PROXY_PROTOCOL://$REVERSE_PROXY_HOST:$REVERSE_PROXY_PORT\""
 
     REVERSE_PROXY_PROTOCOL=${REVERSE_PROXY_PROTOCOL:-https}
     REVERSE_PROXY_PORT=${REVERSE_PROXY_PORT:-443}
 
-    xmlstarlet ed \
-    -P -S -L \
-    -i '/Server/Service/Connector[@port="8080"]' -t attr -n useBodyEncodingForURI -v 'true' \
-    -i '/Server/Service/Connector[@port="8080"]' -t attr -n compression -v 'on' \
-    -i '/Server/Service/Connector[@port="8080"]' -t attr -n compressableMimeType -v 'text/html,text/xml,text/plain,text/css,application/json,application/javascript,application/x-javascript' \
-    -i '/Server/Service/Connector[@port="8080"]' -t attr -n secure -v 'true' \
-    -i '/Server/Service/Connector[@port="8080"]' -t attr -n scheme -v "$REVERSE_PROXY_PROTOCOL" \
-    -i '/Server/Service/Connector[@port="8080"]' -t attr -n proxyName -v "$REVERSE_PROXY_HOST" \
-    -i '/Server/Service/Connector[@port="8080"]' -t attr -n proxyPort -v "$REVERSE_PROXY_PORT" \
-    $CATALINA_HOME/conf/server.xml
+    if grep -q $REVERSE_PROXY_HOST $CATALINA_HOME/conf/server.xml ; then
+        echo "Updating reverse proxy for URL:\"$REVERSE_PROXY_PROTOCOL://$REVERSE_PROXY_HOST:$REVERSE_PROXY_PORT\""
+
+        xmlstarlet ed \
+        -P -S -L \
+        -u '/Server/Service/Connector[@port="8080"]/@useBodyEncodingForURI' -v 'true' \
+        -u '/Server/Service/Connector[@port="8080"]/@compression' -v 'on' \
+        -u '/Server/Service/Connector[@port="8080"]/@compressableMimeType' -v 'text/html,text/xml,text/plain,text/css,application/json,application/javascript,application/x-javascript' \
+        -u '/Server/Service/Connector[@port="8080"]/@secure' -v 'true' \
+        -u '/Server/Service/Connector[@port="8080"]/@scheme' -v "$REVERSE_PROXY_PROTOCOL" \
+        -u '/Server/Service/Connector[@port="8080"]/@proxyName' -v "$REVERSE_PROXY_HOST" \
+        -u '/Server/Service/Connector[@port="8080"]/@proxyPort' -v "$REVERSE_PROXY_PORT" \
+        $CATALINA_HOME/conf/server.xml
+    else
+        echo "Setting reverse proxy for URL:\"$REVERSE_PROXY_PROTOCOL://$REVERSE_PROXY_HOST:$REVERSE_PROXY_PORT\""
+
+        xmlstarlet ed \
+        -P -S -L \
+        -i '/Server/Service/Connector[@port="8080"]' -t attr -n useBodyEncodingForURI -v 'true' \
+        -i '/Server/Service/Connector[@port="8080"]' -t attr -n compression -v 'on' \
+        -i '/Server/Service/Connector[@port="8080"]' -t attr -n compressableMimeType -v 'text/html,text/xml,text/plain,text/css,application/json,application/javascript,application/x-javascript' \
+        -i '/Server/Service/Connector[@port="8080"]' -t attr -n secure -v 'true' \
+        -i '/Server/Service/Connector[@port="8080"]' -t attr -n scheme -v "$REVERSE_PROXY_PROTOCOL" \
+        -i '/Server/Service/Connector[@port="8080"]' -t attr -n proxyName -v "$REVERSE_PROXY_HOST" \
+        -i '/Server/Service/Connector[@port="8080"]' -t attr -n proxyPort -v "$REVERSE_PROXY_PORT" \
+        $CATALINA_HOME/conf/server.xml
+    fi
 fi
 
 echo
