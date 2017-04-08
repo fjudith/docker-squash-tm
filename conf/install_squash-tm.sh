@@ -3,4 +3,4 @@
 
 echo "Installing Language:\"$SQUASH_TM_LANGUAGE\""
 cd /usr/share
-curl -L http://www.squashtest.org/downloads/send/11-archives/249-stm-1150-targz?lang=en | gunzip -c | tar x
+curl -L http://www.squashtest.org/downloads/send/11-archives/254-stm-1151-targz?lang=en | gunzip -c | tar x
