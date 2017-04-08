@@ -6,6 +6,8 @@ Squash TM is the test repository manager found in the open source Squash toolkit
 # Description
 The Dockerfile builds from "Tomcat:8-jre7" see https://hub.docker.com/_/tomcat/
 
+[1.14.2, latest](https://github.com/fjudith/docker-squash-tm/tree/1.14.2)
+
 # Roadmap
 
 * [X] Implement support Reverse-proxy via environment variable.
