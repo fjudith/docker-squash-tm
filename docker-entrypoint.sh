@@ -66,6 +66,10 @@ if [[ -v MYSQL_ENV_GOSU_VERSION ]]; then
         echo 'Database already initialized'
     fi
 
+    echo 'Upgrading MysQL'
+    mysql -h mysql -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME < ../database-scripts/mysql-upgrade-to-$SQUASH_TM_VERSION.RELEASE.sql
+
+
     if [ -z "$DB_PASSWORD" ]; then
         echo >&2 'error: missing required DB_PASSWORD environment variable'
         echo >&2 '  Did you forget to -e DB_PASSWORD=... ?'
@@ -105,6 +109,9 @@ if [[ -v POSTGRES_ENV_GOSU_VERSION ]]; then
     else
         echo 'Database already initialized'
     fi
+
+    echo 'Upgrading PostgreSQL'
+    psql postgresql://$DB_USERNAME:$DB_PASSWORD@postgres/$DB_NAME -f ../database-scripts/postgresql-upgrade-to-$SQUASH_TM_VERSION.RELEASE.sql
 
     if [ -z "$DB_PASSWORD" ]; then
         echo >&2 'error: missing required DB_PASSWORD environment variable'
