@@ -18,13 +18,16 @@ RUN mkdir -p /usr/local/tomcat/conf/Catalina/localhost
 COPY conf/squash-tm.xml /usr/local/tomcat/conf/Catalina/localhost/squash-tm.xml
 
 COPY conf/install_squash-tm.sh /tmp/install_squash-tm.sh
+
 RUN chmod +x /tmp/install_squash-tm.sh
-RUN exec /tmp/install_squash-tm.sh
+
+RUN /tmp/install_squash-tm.sh
 
 # Copy WAR to webapps
 RUN cp /usr/share/squash-tm/bundles/squash-tm.war $CATALINA_HOME/webapps/
 
 COPY docker-entrypoint.sh /usr/share/squash-tm/bin/docker-entrypoint.sh
+
 RUN chmod +x /usr/share/squash-tm/bin/docker-entrypoint.sh
 
 COPY conf/log4j.properties /usr/share/squash-tm/bin/conf
@@ -32,5 +35,7 @@ COPY conf/log4j.properties /usr/share/squash-tm/bin/conf
 EXPOSE 8080
 
 WORKDIR $CATALINA_HOME
+
 ENTRYPOINT ["/usr/share/squash-tm/bin/docker-entrypoint.sh"]
+
 CMD ["catalina.sh", "run"]

@@ -1,15 +1,16 @@
+[![](https://images.microbadger.com/badges/image/fjudith/squash-tm.svg)](https://microbadger.com/images/fjudith/squash-tm "Get your own image badge on microbadger.com")
+
 # Introduction
 Squash TM is the test repository manager found in the open source Squash toolkit. It enables the management of requirements, test cases and campaigns execution in a multiproject context.
 
 # Description
 The Dockerfile builds from "Tomcat:8-jre7" see https://hub.docker.com/_/tomcat/
 
-Only `startup.sh` is customized to allow seemless integration with external database as long as the link alias is `mysql` or `postgres`.
-
 # Roadmap
-* [x] Apache Tomcat support
-* [x] LDAP authentication
-* [x] Reverse proxy support
+
+* [X] Implement support Reverse-proxy via environment variable.
+* [X] Fix container restart issue when Reverse-proxy configured.
+* [X] LDAP authentication support
 
 # Quick Start
 Run the Squash-TM image:
@@ -35,9 +36,9 @@ The default username and password are:
 * username: **admin**
 * password: **admin**
 
-### Configuration
+# Configuration
 
-#### Persistent Volumes
+## Persistent Volumes
 
 If you use this image in production, you'll probably want to persist the following locations in a volume
 
@@ -51,7 +52,7 @@ If you use this image in production, you'll probably want to persist the followi
 /usr/share/squash-tm/plugins                     # Plugins directory
 ```
 
-#### Environment variables
+## Environment variables
 Default `DB_TYPE` is H2
 The following environment variables allows to change for MySQL or PostgreSQL.
 * **DB_TYPE**: Database type, one of h2, mysql, postgresql; default=`h2`
@@ -102,61 +103,7 @@ fjudith/squash-tm
 
 Wait 2-3 minutes the time for Squash-TM to initialize. then login to http://localhost:32760/squash-tm
 
-#### Docker-Compose (english language)
-```
-squash-tm-pg:
-  environment:
-    POSTGRES_DB: squashtm
-    POSTGRES_PASSWORD: Ch4ng3M3
-    POSTGRES_USER: squashtm
-  image: postgres
-  volumes:
-  - squash-tm-db:/var/lib/postgresql
-
-squash-tm:
-  ports:
-  - 32760:8080/tcp
-  image: fjudith/squash-tm
-  links:
-  - squash-tm-pg:postgres
-  volumes:
-  - squash-tm-tmp:/usr/share/squash-tm/tmp
-  - squash-tm-bundles:/usr/share/squash-tm/bundles
-  - squash-tm-conf:/usr/share/squash-tm/conf
-  - squash-tm-logs:/usr/share/squash-tm/logs
-  - squash-tm-jettyhome:/usr/share/squash-tm/jettyhome
-  - squash-tm-luceneindexes:/usr/share/squash-tm/luceneindexes
-  - squash-tm-plugins:/usr/share/squash-tm/plugins
-```
-
-#### Docker-Compose (french language)
-```
-squash-tm-pg:
-  environment:
-    POSTGRES_DB: squashtm
-    POSTGRES_PASSWORD: Ch4ng3M3
-    POSTGRES_USER: squashtm
-  image: fjudith/postgres-fr
-  volumes:
-  - squash-tm-db:/var/lib/postgresql
-
-squash-tm:
-  ports:
-  - 32760:8080/tcp
-  image: fjudith/squash-tm:fr
-  links:
-  - squash-tm-pg:postgres
-  volumes:
-  - squash-tm-tmp:/usr/share/squash-tm/tmp
-  - squash-tm-bundles:/usr/share/squash-tm/bundles
-  - squash-tm-conf:/usr/share/squash-tm/conf
-  - squash-tm-logs:/usr/share/squash-tm/logs
-  - squash-tm-jettyhome:/usr/share/squash-tm/jettyhome
-  - squash-tm-luceneindexes:/usr/share/squash-tm/luceneindexes
-  - squash-tm-plugins:/usr/share/squash-tm/plugins
-```
-
-### Deployment using MySQL (Unstable)
+## Deployment using MySQL (Unstable)
 Database is created by the database container and automatically populated by the application container on first run.
 
 ```bash
@@ -178,7 +125,41 @@ fjudith/squash-tm
 
 Wait 2-3 minutes the time for Squash-TM to initialize. then login to http://localhost:32760/squash-tm
 
-### References
+# Docker-Compose
+The following example enables Postgres database and Reverse-Proxy support for SSL offloading.
+
+```
+squash-tm-pg:
+  environment:
+    POSTGRES_DB: squashtm
+    POSTGRES_PASSWORD: Ch4ng3M3
+    POSTGRES_USER: squashtm
+  image: postgres
+  volumes:
+  - squash-tm-db:/var/lib/postgresql
+
+squash-tm:
+  environment:
+    REVERSE_PROXY_HOST: squashtm.example.com
+    REVERSE_PROXY_PORT: 443
+    REVERSE_PROXY_PROTOCOL: https
+  ports:
+  - 32760:8080/tcp
+  image: fjudith/squash-tm
+  links:
+  - squash-tm-pg:postgres
+  volumes:
+  - squash-tm-tmp:/usr/share/squash-tm/tmp
+  - squash-tm-bundles:/usr/share/squash-tm/bundles
+  - squash-tm-conf:/usr/share/squash-tm/conf
+  - squash-tm-logs:/usr/share/squash-tm/logs
+  - squash-tm-jettyhome:/usr/share/squash-tm/jettyhome
+  - squash-tm-luceneindexes:/usr/share/squash-tm/luceneindexes
+  - squash-tm-plugins:/usr/share/squash-tm/plugins
+```
+
+
+# References
 
 * http://www.squashtest.org
 * https://github.com/Logicify/docker-squash-tm
