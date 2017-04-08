@@ -157,7 +157,6 @@ squash-tm:
   volumes:
   - squash-tm-tmp:/usr/share/squash-tm/tmp
   - squash-tm-bundles:/usr/share/squash-tm/bundles
-  - squash-tm-conf:/usr/share/squash-tm/conf
   - squash-tm-logs:/usr/share/squash-tm/logs
   - squash-tm-jettyhome:/usr/share/squash-tm/jettyhome
   - squash-tm-luceneindexes:/usr/share/squash-tm/luceneindexes
