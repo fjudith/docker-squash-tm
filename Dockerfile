@@ -30,7 +30,7 @@ COPY docker-entrypoint.sh /usr/share/squash-tm/bin/docker-entrypoint.sh
 
 RUN chmod +x /usr/share/squash-tm/bin/docker-entrypoint.sh
 
-COPY conf/log4j.properties /usr/share/squash-tm/bin/conf
+COPY conf/log4j.properties /usr/share/squash-tm/bin/conf/
 
 EXPOSE 8080
 
