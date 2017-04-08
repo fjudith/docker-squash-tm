@@ -3,7 +3,7 @@ MAINTAINER Florian JUDITH <florian.judith.b@gmail.com>
 
 ENV TERM=xterm
 
-ENV SQUASH_TM_VERSION=1.15.1
+ENV SQUASH_TM_VERSION=1.15.3
 ENV CATALINA_HOME /usr/local/tomcat
 ENV JAVA_OPTS="-Xmx1024m -XX:MaxPermSize=256m"
 
