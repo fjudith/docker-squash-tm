@@ -6,6 +6,11 @@ The Dockerfile builds from "Tomcat:8-jre7" see https://hub.docker.com/_/tomcat/
 
 Only `startup.sh` is customized to allow seemless integration with external database as long as the link alias is `mysql` or `postgres`.
 
+# Roadmap
+* [x] Apache Tomcat support
+* [x] LDAP authentication
+* [x] Reverse proxy support
+
 # Quick Start
 Run the Squash-TM image:
 ```
@@ -54,10 +59,25 @@ The following environment variables allows to change for MySQL or PostgreSQL.
 * **DB_USERNAME**: Database username; default=`sa`
 * **DB_PASSWORD**: Database password; default=`sa`
 
-The following envionment variables enable the support of  reverse-proxy (e.g. haproxy with https frontend)
+The following environment variables enable the support of  reverse-proxy (e.g. haproxy with https frontend)
 * **REVERSE_PROXY_HOST**: Fully Qualified name _(e.g. squashtm.example.com)_
 * **REVERSE_PROXY_PORT**: Port listening at de reverse-proxy side; default=`443`
 * **REVERSE_PROXY_PROTOCOL**: _http_ or _https_; default=`https` 
+
+the following environment variables enable the support of LDAP
+* **LDAP_ENABLED**: Enables LDAP Authentication; default=`false`
+* **LDAP_PROVIDER**: Choose between "ldap" and "ad-ldap"; example=`not configured`
+* **LDAP_URL**: URL to LDAP server including tcp port; default=`ldap://example.com:389`
+* **LDAP_SECURITY_MANAGERDN**: Distinguished Name of the user that manage LDAP authentication; default=`ldapuser@example.com`
+* **LDAP_SECURITY_MANAGERPASSWORD**: Password of the user that manage LDAP authentication; default=`password`
+* **LDAP_FETCH_ATTRIBUTES**: default=`true`
+
+  _Search option 1_
+  * **LDAP_USER_DNPATTERNS**: example=`uid={0},ou=people`
+
+  _Search option 2 (Recommended)_
+  * **LDAP_USER_SEARCHFILTER**: Search for user objects; example=`(&(objectclass\=user)(userAccountControl\:1.2.840.113556.1.4.803\:\=512))`
+  * **LDAP_USER_SEARCHBASE**: Attributes for login name (Use "sAMAccountName" instead of "uid" with Active Directory); default=`(uid={0})`
 
 ### Deployment using PostgreSQL
 Database is created by the database container and automatically populated by the application container on first run.

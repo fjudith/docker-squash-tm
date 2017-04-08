@@ -1,8 +1,6 @@
 FROM tomcat:8-jre7
 MAINTAINER Florian JUDITH <florian.judith.b@gmail.com>
 
-ARG SQUASH_TM_LANGUAGE='en'
-
 ENV TERM=xterm
 
 ENV SQUASH_TM_VERSION=1.14.2
