@@ -3,7 +3,7 @@ MAINTAINER Florian JUDITH <florian.judith.b@gmail.com>
 
 ENV TERM=xterm
 
-ENV SQUASH_TM_VERSION=1.14.2
+ENV SQUASH_TM_VERSION=1.15.4
 ENV CATALINA_HOME /usr/local/tomcat
 ENV JAVA_OPTS="-Xmx1024m -XX:MaxPermSize=256m"
 
@@ -30,7 +30,7 @@ COPY docker-entrypoint.sh /usr/share/squash-tm/bin/docker-entrypoint.sh
 
 RUN chmod +x /usr/share/squash-tm/bin/docker-entrypoint.sh
 
-COPY conf/log4j.properties /usr/share/squash-tm/bin/conf/
+COPY conf/log4j2.xml /usr/share/squash-tm/bin/conf/
 
 EXPOSE 8080
 

@@ -6,6 +6,12 @@ Squash TM is the test repository manager found in the open source Squash toolkit
 # Description
 The Dockerfile builds from "Tomcat:8-jre7" see https://hub.docker.com/_/tomcat/
 
+[1.15.4, latest](https://github.com/fjudith/docker-squash-tm/tree/1.15.4)
+[1.15.3](https://github.com/fjudith/docker-squash-tm/tree/1.15.3)
+[1.15.1](https://github.com/fjudith/docker-squash-tm/tree/1.15.1)
+[1.15.0](https://github.com/fjudith/docker-squash-tm/tree/1.15.0)
+[1.14.2](https://github.com/fjudith/docker-squash-tm/tree/1.14.2)
+
 # Roadmap
 
 * [X] Implement support Reverse-proxy via environment variable.
@@ -151,7 +157,6 @@ squash-tm:
   volumes:
   - squash-tm-tmp:/usr/share/squash-tm/tmp
   - squash-tm-bundles:/usr/share/squash-tm/bundles
-  - squash-tm-conf:/usr/share/squash-tm/conf
   - squash-tm-logs:/usr/share/squash-tm/logs
   - squash-tm-jettyhome:/usr/share/squash-tm/jettyhome
   - squash-tm-luceneindexes:/usr/share/squash-tm/luceneindexes
