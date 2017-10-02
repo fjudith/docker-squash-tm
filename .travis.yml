@@ -1,0 +1,40 @@
+env:
+  global:
+  # Docker Repository
+  - REPO=fjudith/squash-tm
+  # Compute docker tag
+  - TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
+  # Retreive commit ID
+  - COMMIT=${TRAVIS_COMMIT::8}
+  - secure: "nelL9WDhEBlg+7/xB4lLaAzRowkFgGymLiq1QE/97yFLWoOV4W00+dIoEo9G8xu+k1CJRZ8/MGA70dOz/Hptnz396wUr0n3cF6AZfOF7l2JWQnwyrjdv3yweHwFSy7/6r06DDWd10iIJKqCFo1/wtcxATfeDzwV4kux6mhL1DDVFMSd6jMUbdHh87d2fGCsJqDMONLsp422cR536Sh2r1JfBTXUna8p8lr5N+Hta/jaw4waqijSpF7sDV5ejJ77gF1wXBcoTxl/MfTCMbH7B/Y1SpeQQhRz9L3hd7Nw4PJGMl3Ml7HwZ3nlTn/sLFYr0j0mCl6ETkrhtk5HpJFNjI3KZk872wkuhlNaS2HnQYvT91O5dTQqaQWn6Ue8mDE38Pm4p2hp/nFqJ0wf9K6hImShKjBlEtCZxTJ7QR3MbYn7M6rCYVNXj4ytw4jq8SiX1kCNiFNyvc+dt73dICE74QOgfr1ykBWulBcneYG5nWb3JiIhkIhugQr8Cvf4i7S343TJmmX542W/+mrLS59J5+133WTtTRcQ/Ox+t9DxUwyWT8dGOO5ps/V91QddZzLaty8IqM8Ef9YscIErLy0pOIPu4ViLwqFdUuNb+gTADFIuW6/jGheIxFw3NqxJuvYOE3MJr6gE1M4Z0Kf4TevInEKdDFulZ6lCqqEH01g8wVBs="
+  - secure: "dGzi2tK2HLHkhVPJyfLxBhNIW3tT0+6PHmwfxjWYuSETyHr9gsr7gGeUDiGSkuKl+M3iY3jDI8dPl1Xhhi10+Rv/L9Xhte6RIPZdLPz82ThE4StFK+GLw020BQYtR82GlnKh3nkB9uqDhdDehbddeZLawy2zrPX/lMsSR6souadNnU6g0Aso5xM8T3ciSg0X2hnl0fWgHwbwnnK/zDvW0rAVysEsqZZYI5yIRft946yj+pwhNZLSupQpx2xGGvO+jQsdEg/bOQAxiNSLqlcnqW9Z5XSYIr3fmNNZMmITTnB+h4IMKG3oVAqotsNVL5CxsPhO8+jFUNDWl3L+YMOt2/YqZAP+5g0bX4mOagObqfO0QS7juXnih0c9pPjbICcvkrfgzKvC8l7iX8tyP06Yp+xQsiJOb+v9jugkPOuldDiYHzf+aCgi8a+Se7q6rT17oUNefEdtqvBgdY6QsorlHokMFjJsC4U7y6NpeVnqVrONcz+yeaZROEzOh9rmJlrouFkyuJ3hnYU6ZjbWsmEacREMy29VfhjemeFqhAHBxt6KpjRiDlBqKJ+TqSFaU5Z7sWDNESoLsFJ68BqphRWORluEPbSKwVcxbkyKVouVflw7wlBbIRrhy1FfnLbc33gKqLxYsJZ5IjpHNTeN23XKUXKZaXcndXerFGz2ibHaTxs="
+  - secure: "C0CUyzMQTprGhhdZ7PVFEhh2FfNTZ3Mnq2zv3hZu+mQrnhIEmdE1E3ig3fXK1Oa855Lu667zYQBoAW8esleiQuysP1FwzygfCwD3G6+FEMmPJ7qKYjgvSYlbAjawipaZcWZ8iVe1fu60aepCPor1N1wqGG20q8ujLv8yMaccR/j0IPAYQ9IWyOWRE4B5tGgbrXsosmz6vfOiOHrs/Anp+Y0aLjzWPtbvSEDlNrgNIdOmTv0sWuZDxQATzCZaTayfOOVtE7VIexlD+50DsXOIzm8UPN/9NkZflYO5FLTG8Tdqg50klKQ6ou5Ho9wOfFZXnHRy+kxeQbw1qCxMU4L7f1tmaXlyGhYInKBfzTuc9ulF4h1GV8KUou1J3RzSkT7mqXZ5+CN7k+6dFi+G9azo1bC069g8sEziqeV8XLJNO+0xiRlU+LgcMIEkIfRKQBiLiK/Lz54mza+vsIuiUb/73UjtmcMEPtj5HocXq+910j4EkN4g9jECXbycPd7xEHLrLccB7dgTiCjY0Vf4yIgScA6Dwt9DZgzwS3eORU6kr1IqSaAKbj1PiR542hF6F6gYDIrz58zTzQwPj3dPLZ5PQHIYc915WRVOllMn0z2p33/4Nu+Seyo8BrIHz/jgy2AqwJhL1DM8EPVTW6psKkgyHRx7xjTglRXjpB8S8eHIhF0="
+
+
+sudo: required
+services:
+  - docker
+
+
+before_install:
+  - docker build -f Dockerfile -t $REPO:$COMMIT .
+  - docker run --name 'mysql' -d -p 32731:3306 -e MYSQL_ROOT_PASSWORD=secret -e MYSQL_DATABASE=squash-tm -e MYSQL_USER=squash-tm -e MYSQL_PASSWORD=secret mysql --character-set-server=utf8 --collation-server=utf8_general_ci --max_connections=1024
+  - sleep 10
+  - docker run --name 'squash-tm' -d -p 32732:8080 --link mysql:mysql $REPO:$COMMIT
+  - docker ps -a
+
+
+script:
+  # Wait for squash-tm to start
+  - sleep 120
+  - docker logs squash-tm
+  # -i, --include – include protocol headers in the output (H/F)
+  # -X, --request – specify request  COMMAND (GET, PUT, DELETE…)  to use
+  - docker exec squash-tm /bin/bash -c "curl -i -L http://localhost:8080/squash-tm"
+
+
+after_success:
+  - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+  - docker tag $REPO:$COMMIT $REPO:$TAG
+  - docker tag $REPO:$COMMIT $REPO:travis-$TRAVIS_BUILD_NUMBER
+  - docker push $REPO:$TAG
