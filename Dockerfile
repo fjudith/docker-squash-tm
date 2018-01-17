@@ -18,10 +18,6 @@ RUN mkdir -p /usr/local/tomcat/conf/Catalina/localhost
 
 COPY conf/squash-tm.xml /usr/local/tomcat/conf/Catalina/localhost/squash-tm.xml
 
-COPY conf/install_squash-tm.sh /tmp/install_squash-tm.sh
-
-RUN chmod +x /tmp/install_squash-tm.sh
-
 RUN cd /usr/share && \
 	curl -L ${SQUASH_TM_URL} | gunzip -c | tar x
 
