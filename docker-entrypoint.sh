@@ -40,7 +40,7 @@ function cfg_replace_option {
   fi
 }
 
-SQUAH_TM_CFG_PROPERTIES=/usr/share/squash-tm/conf/squash.tm.cfg.properties
+SQUASH_TM_CFG_PROPERTIES=/usr/share/squash-tm/conf/squash.tm.cfg.properties
 
 cd /usr/share/squash-tm/bin
 
@@ -132,11 +132,11 @@ fi
 
 # Implement database configuration in /usr/share/squash-tm/conf/squash.tm.cfg.properties
 # https://bitbucket.org/nx/squashtest-tm/wiki/WarDeploymentGuide
-cfg_replace_option spring.datasource.url $DB_URL $SQUAH_TM_CFG_PROPERTIES
-cfg_replace_option spring.datasource.username $DB_USERNAME $SQUAH_TM_CFG_PROPERTIES
-cfg_replace_option spring.datasource.password $DB_PASSWORD $SQUAH_TM_CFG_PROPERTIES
-cfg_replace_option squash.path.root /usr/share/squash-tm $SQUAH_TM_CFG_PROPERTIES
-cfg_replace_option spring.profiles.active $DB_TYPE $SQUAH_TM_CFG_PROPERTIES
+cfg_replace_option spring.datasource.url $DB_URL $SQUASH_TM_CFG_PROPERTIES
+cfg_replace_option spring.datasource.username $DB_USERNAME $SQUASH_TM_CFG_PROPERTIES
+cfg_replace_option spring.datasource.password $DB_PASSWORD $SQUASH_TM_CFG_PROPERTIES
+cfg_replace_option squash.path.root /usr/share/squash-tm $SQUASH_TM_CFG_PROPERTIES
+cfg_replace_option spring.profiles.active $DB_TYPE $SQUASH_TM_CFG_PROPERTIES
 
 # Deploy webapp's context
 # https://bitbucket.org/nx/squashtest-tm/wiki/WarDeploymentGuide
@@ -156,21 +156,21 @@ if [[ "$LDAP_ENABLED" = "true" ]]; then
     	#LDAP_USER_SEARCHBASE=${LDAP_USER_SEARCHBASE:-(uid={0})}
     	LDAP_FETCH_ATTRIBUTES=${LDAP_FETCH_ATTRIBUTES:-true}
 
-    	cfg_replace_option authentication.provider "$LDAP_PROVIDER" $SQUAH_TM_CFG_PROPERTIES
-    	cfg_replace_option authentication.ldap.server.url "$LDAP_URL" $SQUAH_TM_CFG_PROPERTIES
-    	cfg_replace_option authentication.ldap.server.managerDn "$LDAP_SECURITY_MANAGERDN" $SQUAH_TM_CFG_PROPERTIES
-    	cfg_replace_option authentication.ldap.server.managerPassword "$LDAP_SECURITY_MANAGERPASSWORD" $SQUAH_TM_CFG_PROPERTIES
+    	cfg_replace_option authentication.provider "$LDAP_PROVIDER" $SQUASH_TM_CFG_PROPERTIES
+    	cfg_replace_option authentication.ldap.server.url "$LDAP_URL" $SQUASH_TM_CFG_PROPERTIES
+    	cfg_replace_option authentication.ldap.server.managerDn "$LDAP_SECURITY_MANAGERDN" $SQUASH_TM_CFG_PROPERTIES
+    	cfg_replace_option authentication.ldap.server.managerPassword "$LDAP_SECURITY_MANAGERPASSWORD" $SQUASH_TM_CFG_PROPERTIES
     
     	if [ -v LDAP_USER_DNPATTERNS ]; then
-    		cfg_replace_option authentication.ldap.user.dnPatterns "$LDAP_USER_DNPATTERNS" $SQUAH_TM_CFG_PROPERTIES
+    		cfg_replace_option authentication.ldap.user.dnPatterns "$LDAP_USER_DNPATTERNS" $SQUASH_TM_CFG_PROPERTIES
     	fi
     
     	if [ -v LDAP_USER_SEARCHBASE ]; then
-    		cfg_replace_option authentication.ldap.user.searchBase "$LDAP_USER_SEARCHBASE" $SQUAH_TM_CFG_PROPERTIES
-    		cfg_replace_option authentication.ldap.user.searchFilter "$LDAP_USER_SEARCHFILTER" $SQUAH_TM_CFG_PROPERTIES
+    		cfg_replace_option authentication.ldap.user.searchBase "$LDAP_USER_SEARCHBASE" $SQUASH_TM_CFG_PROPERTIES
+    		cfg_replace_option authentication.ldap.user.searchFilter "$LDAP_USER_SEARCHFILTER" $SQUASH_TM_CFG_PROPERTIES
     	fi
 
-    	cfg_replace_option authentication.ldap.user.fetchAttributes "$LDAP_FETCH_ATTRIBUTES" $SQUAH_TM_CFG_PROPERTIES
+    	cfg_replace_option authentication.ldap.user.fetchAttributes "$LDAP_FETCH_ATTRIBUTES" $SQUASH_TM_CFG_PROPERTIES
     fi
 
     if [[ "$LDAP_PROVIDER" = "ad.ldap" ]]; then
@@ -181,11 +181,11 @@ if [[ "$LDAP_ENABLED" = "true" ]]; then
     	# LDAP_USER_SEARCHFILTER=${LDAP_USER_SEARCHFILTER:-(&(objectClass=user)(userPrincipalName={0})}
     	# LDAP_USER_SEARCHBASE=${LDAP_USER_SEARCHBASE:-(uid={0})}
 
-    	cfg_replace_option authentication.provider "$LDAP_PROVIDER" $SQUAH_TM_CFG_PROPERTIES
-    	cfg_replace_option authentication.ad.server.url "$LDAP_URL" $SQUAH_TM_CFG_PROPERTIES
-    	cfg_replace_option authentication.ad.server.domain "$AD_DOMAIN" $SQUAH_TM_CFG_PROPERTIES
-    	cfg_replace_option authentication.ad.user.searchBase "$LDAP_USER_SEARCHBASE" $SQUAH_TM_CFG_PROPERTIES
-    	cfg_replace_option authentication.ad.user.searchFilter "$LDAP_USER_SEARCHFILTER" $SQUAH_TM_CFG_PROPERTIES
+    	cfg_replace_option authentication.provider "$LDAP_PROVIDER" $SQUASH_TM_CFG_PROPERTIES
+    	cfg_replace_option authentication.ad.server.url "$LDAP_URL" $SQUASH_TM_CFG_PROPERTIES
+    	cfg_replace_option authentication.ad.server.domain "$AD_DOMAIN" $SQUASH_TM_CFG_PROPERTIES
+    	cfg_replace_option authentication.ad.user.searchBase "$LDAP_USER_SEARCHBASE" $SQUASH_TM_CFG_PROPERTIES
+    	cfg_replace_option authentication.ad.user.searchFilter "$LDAP_USER_SEARCHFILTER" $SQUASH_TM_CFG_PROPERTIES
     fi
 fi
 

@@ -13,10 +13,10 @@ services:
     image: fjudith/squash-tm:1.17.0
     environment:
       DB_TYPE: postgresql
+      DB_HOST: postgres
       DB_NAME: squashtm
       DB_USERNAME: squashtm
       DB_PASSWORD: V3ry1ns3cur3P4ssw0rd
-      DB_URL: jdbc:postgresql://postgres:5432/squashtm
     volumes:
     - /usr/share/squash-tm/plugins
     links:
