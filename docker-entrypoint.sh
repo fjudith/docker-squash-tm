@@ -46,21 +46,18 @@ cd /usr/share/squash-tm/bin
 
 # if we're linked to MySQL and thus have credentials already, let's use them
 if [[ -v MYSQL_ENV_GOSU_VERSION ]]; then
-    DB_TYPE=${DB_TYPE:-'mysql'}
-    DB_USERNAME=${DB_USERNAME:-${MYSQL_ENV_MYSQL_USER:-root}}
+    DB_TYPE='mysql'
+    DB_HOST='mysql'
+    DB_PORT='3306'
+    DB_DRIVER='org.gjt.mm.mysql.Driver'
+    DB_USERNAME=${MYSQL_ENV_MYSQL_USER:-'root'}
     
-    if [ "$DB_USERNAME" = 'root' ]; then
+    if [ "${DB_USERNAME}" = 'root' ]; then
         DB_PASSWORD=${MYSQL_ENV_MYSQL_ROOT_PASSWORD}
     fi
     
-    DB_PASSWORD=$MYSQL_ENV_MYSQL_PASSWORD
-    DB_NAME=${MYSQL_ENV_MYSQL_DATABASE:-squashtm}
-    DB_URL="jdbc:mysql://mysql:3306/$DB_NAME"
-
-    echo 'Updrading MysQL'
-    if [[ -f "../database-scripts/mysql-upgrade-to-$SQUASH_TM_VERSION.sql" ]]; then
-        mysql -h mysql -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME < ../database-scripts/mysql-upgrade-to-$SQUASH_TM_VERSION.sql
-    fi
+    DB_PASSWORD=${MYSQL_ENV_MYSQL_PASSWORD}
+    DB_NAME=${MYSQL_ENV_MYSQL_DATABASE:-'squashtm'}
 
     if [ -z "$DB_PASSWORD" ]; then
         echo >&2 'error: missing required DB_PASSWORD environment variable'
@@ -73,21 +70,18 @@ fi
 
 # if we're linked to PostgreSQL and thus have credentials already, let's use them
 if [[ -v POSTGRES_ENV_GOSU_VERSION ]]; then
-    DB_TYPE=${DB_TYPE:-'postgresql'}
-    DB_USERNAME=${DB_USERNAME:-${POSTGRES_ENV_POSTGRES_USER:-root}}
+    DB_TYPE='postgresql'
+    DB_HOST='postgres'
+    DB_PORT='5432'
+    DB_DRIVER='org.postgresql.Driver'
+    DB_USERNAME=${POSTGRES_ENV_POSTGRES_USER:-'root'}
 
-    if [ "$DB_USERNAME" = 'postgres' ]; then
+    if [ "${DB_USERNAME}" = 'postgres' ]; then
         DB_PASSWORD=${DB_PASSWORD:-'postgres' }
     fi
 
     DB_PASSWORD=${POSTGRES_ENV_POSTGRES_PASSWORD}
-    DB_NAME=${POSTGRES_ENV_POSTGRES_DB:-squashtm}
-    DB_URL="jdbc:postgresql://postgres:5432/$DB_NAME"
-
-    echo 'Updrading PostgreSQL'
-    if [[ -f "../database-scripts/postgresql-upgrade-to-$SQUASH_TM_VERSION.sql" ]]; then
-        psql postgresql://$DB_USERNAME:$DB_PASSWORD@postgres/$DB_NAME -f ../database-scripts/postgresql-upgrade-to-$SQUASH_TM_VERSION.sql
-    fi
+    DB_NAME=${POSTGRES_ENV_POSTGRES_DB:-'squashtm'}
 
     if [ -z "$DB_PASSWORD" ]; then
         echo >&2 'error: missing required DB_PASSWORD environment variable'
@@ -97,6 +91,14 @@ if [[ -v POSTGRES_ENV_GOSU_VERSION ]]; then
         exit 1
     fi
 fi
+
+DB_TYPE=${DB_TYPE:-'mysql'}
+DB_HOST=${DB_HOST:-'mysql'}
+DB_USERNAME=${DB_USERNAME:-'root'}
+DB_PASSWORD=${DB_PASSWORD:-'root'}
+DB_NAME=${DB_NAME:-'squashtm'}
+DB_PORT=${DB_PORT:-'3306'}
+DB_URL="jdbc:${DB_TYPE}://${DB_HOST}:${DB_PORT}/$DB_NAME"
 
 sleep 10
 
@@ -108,6 +110,11 @@ if [[ "${DB_TYPE}" = "mysql" ]]; then
     else
         echo 'Database already initialized'
     fi
+
+    echo 'Updrading MysQL'
+    if [[ -f "../database-scripts/mysql-upgrade-to-$SQUASH_TM_VERSION.sql" ]]; then
+        mysql -h mysql -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME < ../database-scripts/mysql-upgrade-to-$SQUASH_TM_VERSION.sql
+    fi
 elif [[ "${DB_TYPE}" = "postgresql" ]]; then
     echo 'Using PostgreSQL'
     if ! psql postgresql://$DB_USERNAME:$DB_PASSWORD@postgres/$DB_NAME -c "SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'issue';" | grep 1 ; then
@@ -115,6 +122,11 @@ elif [[ "${DB_TYPE}" = "postgresql" ]]; then
         psql postgresql://$DB_USERNAME:$DB_PASSWORD@postgres/$DB_NAME -f ../database-scripts/postgresql-full-install-version-$SQUASH_TM_VERSION.RELEASE.sql
     else
         echo 'Database already initialized'
+    fi
+
+    echo 'Updrading PostgreSQL'
+    if [[ -f "../database-scripts/postgresql-upgrade-to-$SQUASH_TM_VERSION.sql" ]]; then
+        psql postgresql://$DB_USERNAME:$DB_PASSWORD@postgres/$DB_NAME -f ../database-scripts/postgresql-upgrade-to-$SQUASH_TM_VERSION.sql
     fi
 fi
 
