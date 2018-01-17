@@ -1,4 +1,4 @@
-FROM tomcat:8-jre7
+FROM tomcat:8-jre8
 MAINTAINER Florian JUDITH <florian.judith.b@gmail.com>
 
 ENV TERM='xterm'

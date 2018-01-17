@@ -1,20 +1,25 @@
 version: '2'
 services:
-  squash-tm-pg:
-    image: amd64/postgres:
+  postgres:
+    image: amd64/postgres:9.4
     environment:
       POSTGRES_DB: squashtm
-      POSTGRES_PASSWORD: xV0Xd62upvJxBCbbVDJY
+      POSTGRES_PASSWORD: V3ry1ns3cur3P4ssw0rd
       POSTGRES_USER: squashtm
     volumes:
-    - squash-tm-db:/var/lib/postgresql/data
+    - /var/lib/postgresql/data
   squash-tm:
     build: ./
     image: fjudith/squash-tm-enterprise:1.17.0
     environment:
+      DB_TYPE: postgresql
+      DB_NAME: squashtm
+      DB_USERNAME: squashtm
+      DB_PASSWORD: V3ry1ns3cur3P4ssw0rd
+      DB_URL: jdbc:postgresql://postgres:5432/squashtm
     volumes:
-    - squash-tm-plugins:/usr/share/squash-tm/plugins
+    - /usr/share/squash-tm/plugins
     links:
-    - squash-tm-pg:postgres
+    - postgres:postgres
     ports:
     - 32760:8080/tcp

@@ -44,27 +44,18 @@ SQUAH_TM_CFG_PROPERTIES=/usr/share/squash-tm/conf/squash.tm.cfg.properties
 
 cd /usr/share/squash-tm/bin
 
-
-
-
 # if we're linked to MySQL and thus have credentials already, let's use them
 if [[ -v MYSQL_ENV_GOSU_VERSION ]]; then
-    : ${DB_TYPE='mysql'}
-    : ${DB_USERNAME:=${MYSQL_ENV_MYSQL_USER:-root}}
+    DB_TYPE=${DB_TYPE:-'mysql'}
+    DB_USERNAME=${DB_USERNAME:-${MYSQL_ENV_MYSQL_USER:-root}}
+    
     if [ "$DB_USERNAME" = 'root' ]; then
-        : ${DB_PASSWORD:=$MYSQL_ENV_MYSQL_ROOT_PASSWORD}
+        DB_PASSWORD=${MYSQL_ENV_MYSQL_ROOT_PASSWORD}
     fi
-    : ${DB_PASSWORD:=$MYSQL_ENV_MYSQL_PASSWORD}
-    : ${DB_NAME:=${MYSQL_ENV_MYSQL_DATABASE:-squashtm}}
-    : ${DB_URL="jdbc:mysql://mysql:3306/$DB_NAME"}
-
-    echo 'Using MysQL'
-    if ! mysql -h mysql -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME -e "SELECT 1 FROM information_schema.tables WHERE table_schema = 'squashtm' AND table_name = 'ISSUE';" | grep 1 ; then
-        echo 'Initializing MySQL database'
-        mysql -h mysql -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME < ../database-scripts/mysql-full-install-version-$SQUASH_TM_VERSION.RELEASE.sql
-    else
-        echo 'Database already initialized'
-    fi
+    
+    DB_PASSWORD=$MYSQL_ENV_MYSQL_PASSWORD
+    DB_NAME=${MYSQL_ENV_MYSQL_DATABASE:-squashtm}
+    DB_URL="jdbc:mysql://mysql:3306/$DB_NAME"
 
     echo 'Updrading MysQL'
     if [[ -f "../database-scripts/mysql-upgrade-to-$SQUASH_TM_VERSION.sql" ]]; then
@@ -78,39 +69,20 @@ if [[ -v MYSQL_ENV_GOSU_VERSION ]]; then
         echo >&2 '  (Also of interest might be DB_USERNAME and DB_NAME.)'
         exit 1
     fi
-
-    # Implement database configuration in /usr/share/squash-tm/conf/squash.tm.cfg.properties
-    # https://bitbucket.org/nx/squashtest-tm/wiki/WarDeploymentGuide
-    cfg_replace_option spring.datasource.url $DB_URL $SQUAH_TM_CFG_PROPERTIES
-    cfg_replace_option spring.datasource.username $DB_USERNAME $SQUAH_TM_CFG_PROPERTIES
-    cfg_replace_option spring.datasource.password $DB_PASSWORD $SQUAH_TM_CFG_PROPERTIES
-    cfg_replace_option squash.path.root /usr/share/squash-tm $SQUAH_TM_CFG_PROPERTIES
-    cfg_replace_option spring.profiles.active $DB_TYPE $SQUAH_TM_CFG_PROPERTIES
-    
-    # Deploy webapp's context
-    #https://bitbucket.org/nx/squashtest-tm/wiki/WarDeploymentGuide
-    sed -i "s#@@DB_TYPE@@#$DB_TYPE#g" /usr/local/tomcat/conf/Catalina/localhost/squash-tm.xml
-    sed -i "s#@@DB_URL@@#$DB_URL#g" /usr/local/tomcat/conf/Catalina/localhost/squash-tm.xml
 fi
 
 # if we're linked to PostgreSQL and thus have credentials already, let's use them
 if [[ -v POSTGRES_ENV_GOSU_VERSION ]]; then
-    : ${DB_TYPE='postgresql'}
-    : ${DB_USERNAME:=${POSTGRES_ENV_POSTGRES_USER:-root}}
-    if [ "$DB_USERNAME" = 'postgres' ]; then
-        : ${DB_PASSWORD:='postgres' }
-    fi
-    : ${DB_PASSWORD:=$POSTGRES_ENV_POSTGRES_PASSWORD}
-    : ${DB_NAME:=${POSTGRES_ENV_POSTGRES_DB:-squashtm}}
-    : ${DB_URL="jdbc:postgresql://postgres:5432/$DB_NAME"}
+    DB_TYPE=${DB_TYPE:-'postgresql'}
+    DB_USERNAME=${DB_USERNAME:-${POSTGRES_ENV_POSTGRES_USER:-root}}
 
-    echo 'Using PostgreSQL'
-    if ! psql postgresql://$DB_USERNAME:$DB_PASSWORD@postgres/$DB_NAME -c "SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'issue';" | grep 1 ; then
-        echo 'Initializing PostgreSQL database'
-        psql postgresql://$DB_USERNAME:$DB_PASSWORD@postgres/$DB_NAME -f ../database-scripts/postgresql-full-install-version-$SQUASH_TM_VERSION.RELEASE.sql
-    else
-        echo 'Database already initialized'
+    if [ "$DB_USERNAME" = 'postgres' ]; then
+        DB_PASSWORD=${DB_PASSWORD:-'postgres' }
     fi
+
+    DB_PASSWORD=${POSTGRES_ENV_POSTGRES_PASSWORD}
+    DB_NAME=${POSTGRES_ENV_POSTGRES_DB:-squashtm}
+    DB_URL="jdbc:postgresql://postgres:5432/$DB_NAME"
 
     echo 'Updrading PostgreSQL'
     if [[ -f "../database-scripts/postgresql-upgrade-to-$SQUASH_TM_VERSION.sql" ]]; then
@@ -124,23 +96,43 @@ if [[ -v POSTGRES_ENV_GOSU_VERSION ]]; then
         echo >&2 '  (Also of interest might be DB_USERNAME and DB_NAME.)'
         exit 1
     fi
-
-    # Implement database configuration in /usr/share/squash-tm/conf/squash.tm.cfg.properties
-    # https://bitbucket.org/nx/squashtest-tm/wiki/WarDeploymentGuide
-    cfg_replace_option spring.datasource.url $DB_URL $SQUAH_TM_CFG_PROPERTIES
-    cfg_replace_option spring.datasource.username $DB_USERNAME $SQUAH_TM_CFG_PROPERTIES
-    cfg_replace_option spring.datasource.password $DB_PASSWORD $SQUAH_TM_CFG_PROPERTIES
-    cfg_replace_option squash.path.root /usr/share/squash-tm $SQUAH_TM_CFG_PROPERTIES
-    cfg_replace_option spring.profiles.active $DB_TYPE $SQUAH_TM_CFG_PROPERTIES
-
-    # Deploy webapp's context
-    # https://bitbucket.org/nx/squashtest-tm/wiki/WarDeploymentGuide
-    sed -i "s#@@DB_TYPE@@#$DB_TYPE#g" /usr/local/tomcat/conf/Catalina/localhost/squash-tm.xml
-    sed -i "s#@@DB_URL@@#$DB_URL#g" /usr/local/tomcat/conf/Catalina/localhost/squash-tm.xml
 fi
 
+sleep 10
+
+if [[ "${DB_TYPE}" = "mysql" ]]; then
+    echo 'Using MysQL'
+    if ! mysql -h mysql -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME -e "SELECT 1 FROM information_schema.tables WHERE table_schema = 'squashtm' AND table_name = 'ISSUE';" | grep 1 ; then
+        echo 'Initializing MySQL database'
+        mysql -h mysql -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME < ../database-scripts/mysql-full-install-version-$SQUASH_TM_VERSION.RELEASE.sql
+    else
+        echo 'Database already initialized'
+    fi
+elif [[ "${DB_TYPE}" = "postgresql" ]]; then
+    echo 'Using PostgreSQL'
+    if ! psql postgresql://$DB_USERNAME:$DB_PASSWORD@postgres/$DB_NAME -c "SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'issue';" | grep 1 ; then
+        echo 'Initializing PostgreSQL database'
+        psql postgresql://$DB_USERNAME:$DB_PASSWORD@postgres/$DB_NAME -f ../database-scripts/postgresql-full-install-version-$SQUASH_TM_VERSION.RELEASE.sql
+    else
+        echo 'Database already initialized'
+    fi
+fi
+
+# Implement database configuration in /usr/share/squash-tm/conf/squash.tm.cfg.properties
+# https://bitbucket.org/nx/squashtest-tm/wiki/WarDeploymentGuide
+cfg_replace_option spring.datasource.url $DB_URL $SQUAH_TM_CFG_PROPERTIES
+cfg_replace_option spring.datasource.username $DB_USERNAME $SQUAH_TM_CFG_PROPERTIES
+cfg_replace_option spring.datasource.password $DB_PASSWORD $SQUAH_TM_CFG_PROPERTIES
+cfg_replace_option squash.path.root /usr/share/squash-tm $SQUAH_TM_CFG_PROPERTIES
+cfg_replace_option spring.profiles.active $DB_TYPE $SQUAH_TM_CFG_PROPERTIES
+
+# Deploy webapp's context
+# https://bitbucket.org/nx/squashtest-tm/wiki/WarDeploymentGuide
+sed -i "s#@@DB_TYPE@@#$DB_TYPE#g" /usr/local/tomcat/conf/Catalina/localhost/squash-tm.xml
+sed -i "s#@@DB_URL@@#$DB_URL#g" /usr/local/tomcat/conf/Catalina/localhost/squash-tm.xml
+
 # if we're enabling LDAP or Active Directory, Let's update Squash-TM properties file
-if [ $LDAP_ENABLED = "true" ]; then
+if [[ "$LDAP_ENABLED" = "true" ]]; then
 	if [[ "$LDAP_PROVIDER" = "ldap" ]]; then
 		# Default
     	LDAP_PROVIDER=${LDAP_PROVIDER:-'ldap'}
