@@ -26,7 +26,7 @@ before_install:
 script:
   # Wait for squash-tm to start
   - sleep 120
-  - docker logs squash-tm --tail 1000
+  - docker logs squash-tm --tail 100
   # -i, --include – include protocol headers in the output (H/F)
   # -X, --request – specify request  COMMAND (GET, PUT, DELETE…)  to use
   - docker exec squash-tm /bin/bash -c "curl -i -L http://localhost:8080/squash-tm"
