@@ -10,7 +10,7 @@ services:
     - squash-tm-db:/var/lib/postgresql/data
   squash-tm:
     build: ./
-    image: fjudith/squash-tm-enterprise:1.16.0
+    image: fjudith/squash-tm-enterprise:1.17.0
     environment:
     volumes:
     - squash-tm-plugins:/usr/share/squash-tm/plugins
