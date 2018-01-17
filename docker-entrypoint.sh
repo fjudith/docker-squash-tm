@@ -182,7 +182,6 @@ fi
 #- the version is adequate,
 #- will run the application
 
-
 # Default variables
 JAR_NAME="squash-tm.war"  # Java main library
 HTTP_PORT=${HTTP_PORT:-8080}               # Port for HTTP connector (default 8080; disable with -1)
@@ -203,7 +202,6 @@ DB_PASSWORD=${DB_PASSWORD:-"sa"}               # DataBase password
 REQUIRED_VERSION=1.7
 # Extra Java args
 JAVA_ARGS=${JAVA_ARGS:-"-Xms128m -Xmx512m -XX:MaxPermSize=192m -server"}
-
 
 # Tests if java exists
 echo -n "$0 : checking java environment... ";
@@ -231,7 +229,6 @@ if [ ! -e "$TMP_DIR" ]; then
     mkdir $TMP_DIR
 fi
 
-
 # Tests if the version is high enough
 echo -n "checking version... ";
 
@@ -246,7 +243,6 @@ then
 fi
 
 echo  "done";
-
 
 # Let's go !
 #echo "$0 : starting Squash TM... ";
@@ -296,4 +292,4 @@ echo
 echo 'Squash TM init process complete; ready for start up.'
 echo
 
-catalina.sh run
+exec "$@"
