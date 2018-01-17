@@ -10,7 +10,7 @@ services:
     - /var/lib/postgresql/data
   squash-tm:
     build: ./
-    image: fjudith/squash-tm-enterprise:1.17.0
+    image: fjudith/squash-tm:1.17.0
     environment:
       DB_TYPE: postgresql
       DB_NAME: squashtm
