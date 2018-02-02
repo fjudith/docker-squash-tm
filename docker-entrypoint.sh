@@ -104,9 +104,9 @@ sleep 10
 
 if [[ "${DB_TYPE}" = "mysql" ]]; then
     echo 'Using MysQL'
-    if ! mysql -h mysql -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME -e "SELECT 1 FROM information_schema.tables WHERE table_schema = 'squashtm' AND table_name = 'ISSUE';" | grep 1 ; then
+    if ! mysql -h $DB_HOST -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME -e "SELECT 1 FROM information_schema.tables WHERE table_schema = 'squashtm' AND table_name = 'ISSUE';" | grep 1 ; then
         echo 'Initializing MySQL database'
-        mysql -h mysql -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME < ../database-scripts/mysql-full-install-version-$SQUASH_TM_VERSION.RELEASE.sql
+        mysql -h $DB_HOST -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME < ../database-scripts/mysql-full-install-version-$SQUASH_TM_VERSION.RELEASE.sql
     else
         echo 'Database already initialized'
     fi
