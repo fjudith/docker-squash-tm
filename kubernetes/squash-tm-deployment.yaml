@@ -1,0 +1,300 @@
+##########################################################################
+# PostgreSQL
+##########################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  labels:
+    app: squash-tm
+    tiers: database
+spec:
+  type: ClusterIP
+  ports:
+  - name: postgres
+    port: 5432
+    targetPort: 5432
+    protocol: TCP
+  selector:
+    app: squash-tm
+    tiers: database
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: squash-tm-db
+  labels:
+    app: squash-tm
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 512Mi
+  selector:
+    matchLabels:
+      app: squash-tm
+      tiers: database
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: squash-tm-dblog
+  labels:
+    app: squash-tm
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 512Mi
+  selector:
+    matchLabels:
+      app: squash-tm
+      tiers: database
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: squash-tm
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: squash-tm
+        tiers: database
+    spec:
+      containers:
+      - image: amd64/postgres:9.4
+        name: postgres
+        env:
+        - name: POSTGRES_DB
+          value: squash-tm
+        - name: POSTGRES_USER
+          value: squash-tm
+        # $ kubectl create secret generic postgres-pass --from-file=squash-tm.postgres.password.txt
+        # make sure squash-tm.postgres.password.txt does not have a trailing newline
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: squash-tm-pass
+              key: squash-tm.postgres.password.txt
+        ports:
+        - containerPort: 5432
+          name: postgres
+        volumeMounts:
+        - name: squash-tm-db
+          mountPath: /var/lib/postgresql/data
+        - name: squash-tm-dblog
+          mountPath: /var/log/postgresql
+      volumes:
+      - name: squash-tm-db
+        persistentVolumeClaim:
+          claimName: squash-tm-db
+      - name: squash-tm-dblog
+        persistentVolumeClaim:
+          claimName: squash-tm-dblog
+---
+##########################################################################
+# Squash-TM
+##########################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: squash-tm
+  labels:
+    app: squash-tm
+    tiers: webapp
+spec:
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+  selector:
+    app: squash-tm
+    tiers: webapp
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: squash-tm
+  name: squash-tm-tmp
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 512Mi
+  selector:
+    matchLabels:
+      app: squash-tm
+      tiers: webapp
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: squash-tm
+  name: squash-tm-bundles
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 512Mi
+  selector:
+    matchLabels:
+      app: squash-tm
+      tiers: webapp
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: squash-tm
+  name: squash-tm-logs
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 512Mi
+  selector:
+    matchLabels:
+      app: squash-tm
+      tiers: webapp
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: squash-tm
+  name: squash-tm-jettyhome
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 512Mi
+  selector:
+    matchLabels:
+      app: squash-tm
+      tiers: webapp
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: squash-tm
+  name: squash-tm-luceneindexes
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 512Mi
+  selector:
+    matchLabels:
+      app: squash-tm
+      tiers: webapp
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: squash-tm
+  name: squash-tm-plugins
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 512Mi
+  selector:
+    matchLabels:
+      app: squash-tm
+      tiers: webapp
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: squash-tm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: squash-tm
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: squash-tm
+        tiers: webapp
+    spec:
+      containers:
+      - image: fjudith/squash-tm
+        name: squash-tm
+        env:
+        - name: DB_TYPE
+          value: postgresql
+        - name: DB_HOST
+          value: postgres
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_NAME
+          value: squash-tm
+        - name: DB_USERNAME
+          value: squash-tm
+        # $ kubectl create secret generic postgres-pass --from-file=squash-tm.postgres.password.txt
+        # make sure squash-tm.postgres.password.txt does not have a trailing newline
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: squash-tm-pass
+              key: squash-tm.postgres.password.txt
+        ports:
+        - containerPort: 8080
+          name: http
+        volumeMounts:
+        - name: squash-tm-tmp
+          mountPath: /usr/share/squash-tm/tmp
+        - name: squash-tm-bundles
+          mountPath: /usr/share/squash-tm/bundles
+        - name: squash-tm-logs
+          mountPath: /usr/share/squash-tm/logs
+        - name: squash-tm-jettyhome
+          mountPath: /usr/share/squash-tm/jettyhome
+        - name: squash-tm-luceneindexes
+          mountPath: /usr/share/squash-tm/luceneindexes
+        - name: squash-tm-plugins
+          mountPath: /usr/share/squash-tm/plugins
+      volumes:
+      - name: squash-tm-tmp
+        persistentVolumeClaim:
+          claimName: squash-tm-tmp
+      - name: squash-tm-bundles
+        persistentVolumeClaim:
+          claimName: squash-tm-bundles
+      - name: squash-tm-logs
+        persistentVolumeClaim:
+          claimName: squash-tm-logs
+      - name: squash-tm-jettyhome
+        persistentVolumeClaim:
+          claimName: squash-tm-jettyhome
+      - name: squash-tm-luceneindexes
+        persistentVolumeClaim:
+          claimName: squash-tm-luceneindexes
+      - name: squash-tm-plugins
+        persistentVolumeClaim:
+          claimName: squash-tm-plugins
+---

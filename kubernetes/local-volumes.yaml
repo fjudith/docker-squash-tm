@@ -1,0 +1,127 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: squash-tm-db
+  labels:
+    type: local
+    app: squash-tm
+    tiers: database
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /tmp/data1/squash-tm-db
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: squash-tm-dblog
+  labels:
+    type: local
+    app: squash-tm
+    tiers: database
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 1Gi
+  hostPath:
+    path: /tmp/data1/squash-tm-dblog
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: squash-tm-tmp
+  labels:
+    type: local
+    app: squash-tm
+    tiers: webapp
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 1Gi
+  hostPath:
+    path: /tmp/data1/squash-tm-tmp
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: squash-tm-bundles
+  labels:
+    type: local
+    app: squash-tm
+    tiers: webapp
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 1Gi
+  hostPath:
+    path: /tmp/data1/squash-tm-bundles
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: squash-tm-logs
+  labels:
+    type: local
+    app: squash-tm
+    tiers: webapp
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 1Gi
+  hostPath:
+    path: /tmp/data1/squash-tm-logs
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: squash-tm-jettyhome
+  labels:
+    type: local
+    app: squash-tm
+    tiers: webapp
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 1Gi
+  hostPath:
+    path: /tmp/data1/squash-tm-jettyhome
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: squash-tm-luceneindexes
+  labels:
+    type: local
+    app: squash-tm
+    tiers: webapp
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 1Gi
+  hostPath:
+    path: /tmp/data1/squash-tm-luceneindexes
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: squash-tm-plugins
+  labels:
+    type: local
+    app: squash-tm
+    tiers: webapp
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 1Gi
+  hostPath:
+    path: /tmp/data1/squash-tm-plugins

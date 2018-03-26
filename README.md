@@ -15,6 +15,8 @@ The Dockerfile builds from "Tomcat:8-jre7" see https://hub.docker.com/_/tomcat/
 [1.15.0](https://github.com/fjudith/docker-squash-tm/tree/1.15.0)
 [1.14.2](https://github.com/fjudith/docker-squash-tm/tree/1.14.2)
 
+[Kubernetes](https://github.com/fjudith/docker-squash-tm/tree/master/kubernetes)
+
 # Roadmap
 
 * [X] Implement support Reverse-proxy via environment variable.
@@ -23,6 +25,7 @@ The Dockerfile builds from "Tomcat:8-jre7" see https://hub.docker.com/_/tomcat/
 
 # Quick Start
 Run the Squash-TM image:
+
 ```
 docker run --name='squash-tm' -it --rm -p 8080:8080 fjudith/squash-tm
 ```
@@ -62,19 +65,26 @@ If you use this image in production, you'll probably want to persist the followi
 ```
 
 ## Environment variables
+
 Default `DB_TYPE` is H2
 The following environment variables allows to change for MySQL or PostgreSQL.
-* **DB_TYPE**: Database type, one of h2, mysql, postgresql; default=`h2`
-* **DB_URL**: DataBase URL; default=`jdbc:h2:../data/squash-tm`
-* **DB_USERNAME**: Database username; default=`sa`
-* **DB_PASSWORD**: Database password; default=`sa`
+
+* **DB_TYPE**: Database type, one of h2, mysql, postgresql; default=`mysql`
+* **DB_HOST**: Hostname of the database container; default=`mysql`
+* **DB_PORT**: database engine listen port (3306=mysql, 5432=postgres); default=`3306`
+* **DB_NAME**: Name of the database; default=`squash-tm`
+* **DB_USERNAME**: Database username; default=`root`
+* **DB_PASSWORD**: Database password; default=`root`
+* **DB_URL**: DataBase URL; default=`jdbc:${DB_TYPE}://${DB_HOST}:${DB_PORT}/$DB_NAME`
 
 The following environment variables enable the support of  reverse-proxy (e.g. haproxy with https frontend)
+
 * **REVERSE_PROXY_HOST**: Fully Qualified name _(e.g. squashtm.example.com)_
 * **REVERSE_PROXY_PORT**: Port listening at de reverse-proxy side; default=`443`
 * **REVERSE_PROXY_PROTOCOL**: _http_ or _https_; default=`https` 
 
 the following environment variables enable the support of LDAP
+
 * **LDAP_ENABLED**: Enables LDAP Authentication; default=`false`
 * **LDAP_PROVIDER**: Choose between "ldap" and "ad-ldap"; example=`not configured`
 * **LDAP_URL**: URL to LDAP server including tcp port; default=`ldap://example.com:389`
@@ -90,6 +100,7 @@ the following environment variables enable the support of LDAP
   * **LDAP_USER_SEARCHBASE**: Attributes for login name (Use "sAMAccountName" instead of "uid" with Active Directory); default=`(uid={0})`
 
 ### Deployment using PostgreSQL
+
 Database is created by the database container and automatically populated by the application container on first run.
 
 ```bash
@@ -112,7 +123,8 @@ fjudith/squash-tm
 
 Wait 2-3 minutes the time for Squash-TM to initialize. then login to http://localhost:32760/squash-tm
 
-## Deployment using MySQL (Unstable)
+### Deployment using MySQL
+
 Database is created by the database container and automatically populated by the application container on first run.
 
 ```bash
@@ -134,7 +146,8 @@ fjudith/squash-tm
 
 Wait 2-3 minutes the time for Squash-TM to initialize. then login to http://localhost:32760/squash-tm
 
-# Docker-Compose
+## Docker-Compose
+
 The following example enables Postgres database and Reverse-Proxy support for SSL offloading.
 
 ```
@@ -166,8 +179,7 @@ squash-tm:
   - squash-tm-plugins:/usr/share/squash-tm/plugins
 ```
 
-
-# References
+## References
 
 * http://www.squashtest.org
 * https://github.com/Logicify/docker-squash-tm
