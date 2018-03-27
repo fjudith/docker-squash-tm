@@ -13,7 +13,6 @@ done
 # Create
 if [ -z create ] ; then
   kubectl create namespace squash-tm
-  kubectl label namespace squash-tm istio-injection=enabled
 
   tr --delete '\n' <squash-tm.postgres.password.txt >.strippedpassword.txt && mv .strippedpassword.txt squash-tm.postgres.password.txt
   kubectl create secret generic -n squash-tm squash-tm-pass --from-file=squash-tm.postgres.password.txt
@@ -23,7 +22,6 @@ if [ -z create ] ; then
   kubectl get svc squash-tm -n squash-tm
 elif [ -v create ] && [ "$create" == "conduit" ]; then
   kubectl create namespace squash-tm
-  kubectl label namespace squash-tm istio-injection=enabled
 
   tr --delete '\n' <squash-tm.postgres.password.txt >.strippedpassword.txt && mv .strippedpassword.txt squash-tm.postgres.password.txt
   kubectl create secret generic -n squash-tm squash-tm-pass --from-file=squash-tm.postgres.password.txt
