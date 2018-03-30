@@ -179,6 +179,30 @@ squash-tm:
   - squash-tm-plugins:/usr/share/squash-tm/plugins
 ```
 
+## Cloud Foundry manifest.yml
+
+```
+---
+applications:
+- name: squashtm
+  docker:
+    image: fjudith/squash-tm
+  instances: 1
+  memory: 1G
+  disk_quota: 1G
+  env: 
+    DB_HOST: <database-service-host>
+    DB_PORT: <database-service-port>
+    DB_TYPE: <database-service-host>
+    DB_NAME: squashtmdb
+    DB_USERNAME: squashtm
+    DB_PASSWORD: ****
+    REVERSE_PROXY_HOST: squashtm.your-cf.domain
+    REVERSE_PROXY_PORT: 443
+    REVERSE_PROXY_PROTOCOL: https
+```
+More info: https://docs.cloudfoundry.org/devguide/deploy-apps/manifest.html#docker 
+
 ## References
 
 * http://www.squashtest.org
