@@ -193,10 +193,10 @@ applications:
   env: 
     DB_HOST: <database-service-host>
     DB_PORT: <database-service-port>
-    DB_TYPE: <database-service-host>
-    DB_NAME: squashtmdb
-    DB_USERNAME: squashtm
-    DB_PASSWORD: ****
+    DB_TYPE: <database-type>
+    DB_NAME: <database-name>
+    DB_USERNAME: <username>
+    DB_PASSWORD: <password>
     REVERSE_PROXY_HOST: squashtm.your-cf.domain
     REVERSE_PROXY_PORT: 443
     REVERSE_PROXY_PROTOCOL: https
