@@ -144,6 +144,10 @@ cfg_replace_option spring.profiles.active $DB_TYPE $SQUASH_TM_CFG_PROPERTIES
 sed -i "s#@@DB_TYPE@@#$DB_TYPE#g" /usr/local/tomcat/conf/Catalina/localhost/squash-tm.xml
 sed -i "s#@@DB_URL@@#$DB_URL#g" /usr/local/tomcat/conf/Catalina/localhost/squash-tm.xml
 
+# Redirect from ROOT page to /squash-tm/
+echo '<!DOCTYPE HTML><html><head><meta http-equiv="refresh" content="0; url=/squash-tm/"></head></html>' > /usr/local/tomcat/webapps/ROOT/index.html
+
+
 # if we're enabling LDAP or Active Directory, Let's update Squash-TM properties file
 if [[ "$LDAP_ENABLED" = "true" ]]; then
 	if [[ "$LDAP_PROVIDER" = "ldap" ]]; then
