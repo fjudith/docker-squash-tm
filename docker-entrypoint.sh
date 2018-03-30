@@ -214,7 +214,7 @@ DB_PASSWORD=${DB_PASSWORD:-"sa"}               # DataBase password
 ## Do not configure a third digit here
 REQUIRED_VERSION=1.7
 # Extra Java args
-JAVA_ARGS=${JAVA_ARGS:-"-Xms128m -Xmx512m -XX:MaxPermSize=192m -server"}
+JAVA_ARGS=${JAVA_ARGS:-"-Xms128m -Xmx512m -server"}
 
 # Tests if java exists
 echo -n "$0 : checking java environment... ";
