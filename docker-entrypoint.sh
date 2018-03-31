@@ -118,16 +118,16 @@ if [[ "${DB_TYPE}" = "mysql" ]]; then
     fi
 elif [[ "${DB_TYPE}" = "postgresql" ]]; then
     echo 'Using PostgreSQL'
-    if ! psql postgresql://$DB_USERNAME:$DB_PASSWORD@$DB_HOST/$DB_NAME -c "SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'issue';" | grep 1 ; then
+    if ! psql postgresql://$DB_USERNAME:$DB_PASSWORD@$DB_HOST:${DB_PORT}/$DB_NAME -c "SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'issue';" | grep 1 ; then
         echo 'Initializing PostgreSQL database'
-        psql postgresql://$DB_USERNAME:$DB_PASSWORD@$DB_HOST/$DB_NAME -f ../database-scripts/postgresql-full-install-version-$SQUASH_TM_VERSION.RELEASE.sql
+        psql postgresql://$DB_USERNAME:$DB_PASSWORD@$DB_HOST:${DB_PORT}/$DB_NAME -f ../database-scripts/postgresql-full-install-version-$SQUASH_TM_VERSION.RELEASE.sql
     else
         echo 'Database already initialized'
     fi
 
     echo 'Updrading PostgreSQL'
     if [[ -f "../database-scripts/postgresql-upgrade-to-$SQUASH_TM_VERSION.sql" ]]; then
-        psql postgresql://$DB_USERNAME:$DB_PASSWORD@$DB_HOST/$DB_NAME -f ../database-scripts/postgresql-upgrade-to-$SQUASH_TM_VERSION.sql
+        psql postgresql://$DB_USERNAME:$DB_PASSWORD@$DB_HOST:${DB_PORT}/$DB_NAME -f ../database-scripts/postgresql-upgrade-to-$SQUASH_TM_VERSION.sql
     fi
 fi
 
@@ -143,6 +143,10 @@ cfg_replace_option spring.profiles.active $DB_TYPE $SQUASH_TM_CFG_PROPERTIES
 # https://bitbucket.org/nx/squashtest-tm/wiki/WarDeploymentGuide
 sed -i "s#@@DB_TYPE@@#$DB_TYPE#g" /usr/local/tomcat/conf/Catalina/localhost/squash-tm.xml
 sed -i "s#@@DB_URL@@#$DB_URL#g" /usr/local/tomcat/conf/Catalina/localhost/squash-tm.xml
+
+# Redirect from ROOT page to /squash-tm/
+echo '<!DOCTYPE HTML><html><head><meta http-equiv="refresh" content="0; url=/squash-tm/"></head></html>' > /usr/local/tomcat/webapps/ROOT/index.html
+
 
 # if we're enabling LDAP or Active Directory, Let's update Squash-TM properties file
 if [[ "$LDAP_ENABLED" = "true" ]]; then
@@ -214,7 +218,7 @@ DB_PASSWORD=${DB_PASSWORD:-"sa"}               # DataBase password
 ## Do not configure a third digit here
 REQUIRED_VERSION=1.7
 # Extra Java args
-JAVA_ARGS=${JAVA_ARGS:-"-Xms128m -Xmx512m -XX:MaxPermSize=192m -server"}
+JAVA_ARGS=${JAVA_ARGS:-"-Xms128m -Xmx512m -server"}
 
 # Tests if java exists
 echo -n "$0 : checking java environment... ";

@@ -12,7 +12,8 @@ RUN apt-get -y update && apt-get -y install \
 	postgresql-client \
 	mysql-client \
 	xmlstarlet \
-	nano 
+	nano \
+	mc
 
 RUN mkdir -p /usr/local/tomcat/conf/Catalina/localhost
 
