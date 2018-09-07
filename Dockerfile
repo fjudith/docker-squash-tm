@@ -3,7 +3,7 @@ MAINTAINER Florian JUDITH <florian.judith.b@gmail.com>
 
 ENV TERM='xterm'
 
-ENV SQUASH_TM_VERSION='1.17.0'
+ENV SQUASH_TM_VERSION='1.17.4
 ENV SQUASH_TM_URL='http://www.squashtest.org/telechargements/send/13-version-stable/269-stm-1170-targz'
 ENV CATALINA_HOME='/usr/local/tomcat'
 ENV JAVA_OPTS="-Xmx1024m -XX:MaxPermSize=256m"
