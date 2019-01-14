@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+  <Appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+        <PatternLayout pattern="[%d{yy-MM-dd HH:mm:ss.SSS}] SquashTM - ${sys:PID} %5p [%t] [%X{requestInfo}] --- %c: %m%n"/>
+    </Console>
+	<RollingFile name="Daily_log" fileName="${sys:logging.dir}/squash-tm.log"
+                 filePattern="${sys:logging.dir}/squash-tm.log.%d{yyyyMMdd}"
+                 >
+        <PatternLayout pattern="[%d{yy-MM-dd HH:mm:ss.SSS}] SquashTM - ${sys:PID} %5p [%t] [%X{requestInfo}] --- %c: %m%n"/>
+      <Policies>
+        <TimeBasedTriggeringPolicy interval="1"/>
+      </Policies>                               
+</RollingFile>
+  </Appenders>
+  <Loggers>
+    <Root level="info">
+      <AppenderRef ref="Console"/>
+	  <AppenderRef ref="Daily_log"/>
+    </Root>
+    <Logger name="org.apache.catalina.startup.DigesterFactory" level="error" additivity="false" >
+      <AppenderRef ref="Console"/>
+	  <AppenderRef ref="Daily_log"/>
+    </Logger>    
+	<Logger name="org.apache.catalina.util.LifecycleBase" level="error" additivity="false" >
+      <AppenderRef ref="Console"/>
+	  <AppenderRef ref="Daily_log"/>
+    </Logger>
+	<Logger name="org.apache.coyote.http11.Http11NioProtocol" level="warn" additivity="false" >
+      <AppenderRef ref="Console"/>
+	  <AppenderRef ref="Daily_log"/>
+    </Logger>
+	<Logger name="org.apache.sshd.common.util.SecurityUtils" level="warn" additivity="false" >
+      <AppenderRef ref="Console"/>
+	  <AppenderRef ref="Daily_log"/>
+    </Logger>	
+	<Logger name="org.apache.tomcat.util.net.NioSelectorPool" level="warn" additivity="false" >
+      <AppenderRef ref="Console"/>
+	  <AppenderRef ref="Daily_log"/>
+    </Logger>
+	<Logger name="org.crsh.plugin" level="warn" additivity="false" >
+      <AppenderRef ref="Console"/>
+	  <AppenderRef ref="Daily_log"/>
+    </Logger>
+	<Logger name="org.crsh.ssh" level="warn" additivity="false" >
+      <AppenderRef ref="Console"/>
+	  <AppenderRef ref="Daily_log"/>
+    </Logger>
+	<Logger name="org.hibernate.validator.internal.util.Version" level="warn" additivity="false" >
+      <AppenderRef ref="Console"/>
+	  <AppenderRef ref="Daily_log"/>
+    </Logger>
+	<Logger name="org.springframework.boot.actuate.autoconfigure.CrshAutoConfiguration" level="warn" additivity="false" >
+      <AppenderRef ref="Console"/>
+	  <AppenderRef ref="Daily_log"/>
+    </Logger>
+	<Logger name="org.springframework.boot.actuate.endpoint.jmx" level="warn" additivity="false" >
+      <AppenderRef ref="Console"/>
+	  <AppenderRef ref="Daily_log"/>
+    </Logger>
+	<Logger name="org.thymeleaf" level="warn" additivity="false" >
+      <AppenderRef ref="Console"/>
+	  <AppenderRef ref="Daily_log"/>
+    </Logger>
+	<Logger name="org.squashtest.csp.tm.testautomation" level="error" additivity="false" >
+      <AppenderRef ref="Console"/>
+	  <AppenderRef ref="Daily_log"/>
+    </Logger>
+	<Logger name="org.squashtest.tm.plugin.testautomation" level="error" additivity="false" >
+      <AppenderRef ref="Console"/>
+	  <AppenderRef ref="Daily_log"/>
+    </Logger>
+  </Loggers>
+</Configuration>
