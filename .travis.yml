@@ -26,6 +26,8 @@ script:
   # Wait for Waarp-R66 to start
   - sleep 20
   - docker ps -a
+  - docker logs sqtm1_postgres_1 --tail 10
+  - docker logs sqtm2_mysql_1 --tail 10
   - docker logs ${SQTM1_CONTAINERID} --tail 100
   - docker logs ${SQTM2_CONTAINERID} --tail 100
   # -i, --include – include protocol headers in the output (H/F)
