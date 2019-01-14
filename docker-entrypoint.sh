@@ -138,6 +138,7 @@ cfg_replace_option spring.datasource.username $DB_USERNAME $SQUASH_TM_CFG_PROPER
 cfg_replace_option spring.datasource.password $DB_PASSWORD $SQUASH_TM_CFG_PROPERTIES
 cfg_replace_option squash.path.root /usr/share/squash-tm $SQUASH_TM_CFG_PROPERTIES
 cfg_replace_option spring.profiles.active $DB_TYPE $SQUASH_TM_CFG_PROPERTIES
+cfg_replace_option logging.dir ${LOG_DIR} $SQUASH_TM_CFG_PROPERTIES
 
 # Deploy webapp's context
 # https://bitbucket.org/nx/squashtest-tm/wiki/WarDeploymentGuide
