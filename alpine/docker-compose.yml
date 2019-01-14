@@ -3,9 +3,9 @@ services:
   mysql:
     image: amd64/mysql:5
     environment:
-      mysql_DB: squashtm
-      mysql_PASSWORD: V3ry1ns3cur3P4ssw0rd
-      mysql_USER: squashtm
+      MYSQL_DATABASE: squashtm
+      MYSQL_PASSWORD: V3ry1ns3cur3P4ssw0rd
+      MYSQL_USER: squashtm
     volumes:
     - /var/lib/mysql/data
   squash-tm:
