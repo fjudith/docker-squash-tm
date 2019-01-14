@@ -4,6 +4,7 @@ env:
   - REPO=fjudith/squash-tm
   # Compute docker tag
   - TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
+  - ALPINE_TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "alpine"; else echo ${TRAVIS_BRANCH}-alpine ; fi`
   # Retreive commit ID
   - COMMIT=${TRAVIS_COMMIT::8}
   - secure: "vcsuPeIh1niGZN+XPwCbc82kZipNSHYzjiqgcYhlgw5xXEu9mOa9OmieVuswVNiLcRRdRpdgCPF7KAYItI8FE6zIWdqmRRukeSq6iIg9emKl6Y3l6YM5p79XzqIyZLyJ2pVUBu4/fziS8gXKCjvltZok0by9D3eJ5ZmGFkwKdZfpo1qJmdeFlKUkDmisR69OmboU9X636NqjTUIpOdeRuA1wF3+Wzt6Vi26O6DcpAHIddMJZuID/cEsIIrp9oeFRJrlLCRD4W9Wa3izvmZ3te28Sv/NqEFpa8ZeOFCv25PB5r4InRAXF3LWFVkHgBS7Uk1EOkuSgq4+oZTZIZaJimudDp/l2Ec2QhSdBYdCrUt7Qafd2H5uv1qpCf5qBfIbeykAfEU+hnWejGxKff599jTfqvUXMcowhJtwI8q9PmAkPbD3FiBswcxxKZJm5gqeim8DkEMEWNMRM8AEPrjOYmr72ORjekUGeHrvSAi+g3wvEtb0PFbFmkatkNqFEp/wSW8n5UUgxG2GrByBI4d4iEy/pqSm9/pKnHSKfgUeAuNKQN5I2iNqI1LP74wu4ab5pNNcMGLvsIxJKO5YB5Lgv9mbPKcDKIG7TXaUho2uWXmkRiLWnAyvPVV0nxZXQg1lJGonmON6i7Wsf9FzYs9Oo3fBjmXoneHfov04UWygM8Og="
@@ -16,24 +17,26 @@ services:
 
 
 before_install:
-  - docker build -f Dockerfile -t $REPO:$COMMIT .
-  - docker run --name 'mysql' -d -p 32731:3306 -e MYSQL_ROOT_PASSWORD=secret -e MYSQL_DATABASE=squash-tm -e MYSQL_USER=squash-tm -e MYSQL_PASSWORD=secret mysql:5 --character-set-server=utf8 --collation-server=utf8_general_ci --max_connections=1024
-  - sleep 10
-  - docker run --name 'squash-tm' -d -p 32732:8080 --link mysql:mysql $REPO:$COMMIT
-  - docker ps -a
-
+  - pushd ./debian/ && docker-compose -f ./docker-compose.yml -p sqtm1 up --build -d --force-recreate && popd
+  - pushd ./alpine/ && docker-compose -f ./docker-compose.yml -p sqtm2 up --build -d --force-recreate && popd
+  - SQTM1_CONTAINERID=$(docker ps -qa -f name="sqtm1_squash-tm_1")
+  - SQTM2_CONTAINERID=$(docker ps -qa -f name="sqtm2_squash-tm_1")
 
 script:
-  # Wait for squash-tm to start
-  - sleep 120
-  - docker logs squash-tm --tail 100
+  # Wait for Waarp-R66 to start
+  - sleep 20
+  - docker ps -a
+  - docker logs ${SQTM1_CONTAINERID} --tail 100
+  - docker logs ${SQTM2_CONTAINERID} --tail 100
   # -i, --include – include protocol headers in the output (H/F)
   # -X, --request – specify request  COMMAND (GET, PUT, DELETE…)  to use
-  - docker exec squash-tm /bin/bash -c "curl -i -L http://localhost:8080/squash-tm"
+  - docker exec ${WAARP1_CONTAINERID} /bin/bash -c "curl -i -L http://localhost:8080/squash-tm"
+  - docker exec ${WAARP2_CONTAINERID} /bin/bash -c "curl -i -L http://localhost:8080/squash-tm"
+
 
 
 after_success:
-  - docker login -u $DOCKER_USER -p $DOCKER_PASS
-  - docker tag $REPO:$COMMIT $REPO:$TAG
-  - docker tag $REPO:$COMMIT $REPO:travis-$TRAVIS_BUILD_NUMBER
-  - docker push $REPO:$TAG
+  - echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin
+  - docker tag ${REPO}:${TAG} ${REPO}:travis-${TRAVIS_BUILD_NUMBER}
+  - docker tag ${REPO}:${ALPINE_TAG} ${REPO}:travis-${TRAVIS_BUILD_NUMBER}-alpine
+  - docker push $REPO
