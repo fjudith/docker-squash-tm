@@ -4,8 +4,8 @@ LABEL maintainer 'Florian JUDITH <florian.judith.b@gmail.com>'
 
 ENV TERM='xterm'
 
-ENV SQUASH_TM_VERSION='1.18.4'
-ENV SQUASH_TM_URL='https://www.squashtest.org/telechargements/send/13-version-stable/298-stm-1184-targz'
+ENV SQUASH_TM_VERSION='1.18.0'
+ENV SQUASH_TM_URL='https://www.squashtest.org/telechargements/send/13-version-stable/292-stm-1180-targz'
 ENV CATALINA_HOME='/usr/local/tomcat'
 ENV JAVA_OPTS="-Xmx1024m -XX:MaxPermSize=256m"
 
