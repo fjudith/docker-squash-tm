@@ -1,19 +1,19 @@
 version: '2'
 services:
-  postgres:
-    image: amd64/postgres:9.4
+  mysql:
+    image: amd64/mysql:9.4
     environment:
-      POSTGRES_DB: squashtm
-      POSTGRES_PASSWORD: V3ry1ns3cur3P4ssw0rd
-      POSTGRES_USER: squashtm
+      mysql_DB: squashtm
+      mysql_PASSWORD: V3ry1ns3cur3P4ssw0rd
+      mysql_USER: squashtm
     volumes:
-    - /var/lib/postgresql/data
+    - /var/lib/mysql/data
   squash-tm:
     build: ./
     image: fjudith/squash-tm:1.18.4-alpine
     environment:
-      DB_TYPE: postgresql
-      DB_HOST: postgres
+      DB_TYPE: mysql
+      DB_HOST: mysql
       DB_NAME: squashtm
       DB_USERNAME: squashtm
       DB_PASSWORD: V3ry1ns3cur3P4ssw0rd
@@ -21,6 +21,6 @@ services:
     volumes:
     - /usr/share/squash-tm/plugins
     links:
-    - postgres:postgres
+    - mysql:mysql
     ports:
     - 32770:8080/tcp
