@@ -10,13 +10,14 @@ services:
     - /var/lib/postgresql/data
   squash-tm:
     build: ./
-    image: fjudith/squash-tm:1.17.0
+    image: fjudith/squash-tm:1.18.4
     environment:
       DB_TYPE: postgresql
       DB_HOST: postgres
       DB_NAME: squashtm
       DB_USERNAME: squashtm
       DB_PASSWORD: V3ry1ns3cur3P4ssw0rd
+      #DB_PORT: 5432
     volumes:
     - /usr/share/squash-tm/plugins
     links:
