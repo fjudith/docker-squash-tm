@@ -1,7 +1,7 @@
 version: '2'
 services:
   mysql:
-    image: amd64/mysql:9.4
+    image: amd64/mysql:5
     environment:
       mysql_DB: squashtm
       mysql_PASSWORD: V3ry1ns3cur3P4ssw0rd
