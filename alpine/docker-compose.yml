@@ -8,7 +8,7 @@ services:
       MYSQL_PASSWORD: V3ry1ns3cur3P4ssw0rd
       MYSQL_USER: squashtm
     volumes:
-    - /var/lib/mysql/data
+    - /var/lib/mysql
   squash-tm:
     build: ./
     image: fjudith/squash-tm:1.18.4-alpine
