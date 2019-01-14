@@ -66,10 +66,7 @@ if [[ -v MYSQL_ENV_GOSU_VERSION ]]; then
         echo >&2 '  (Also of interest might be DB_USERNAME and DB_NAME.)'
         exit 1
     fi
-fi
-
-# if we're linked to PostgreSQL and thus have credentials already, let's use them
-if [[ -v POSTGRES_ENV_GOSU_VERSION ]]; then
+elif [[ -v POSTGRES_ENV_GOSU_VERSION ]]; then
     DB_TYPE='postgresql'
     DB_HOST='postgres'
     DB_PORT='5432'
@@ -97,13 +94,15 @@ DB_HOST=${DB_HOST:-'mysql'}
 DB_USERNAME=${DB_USERNAME:-'root'}
 DB_PASSWORD=${DB_PASSWORD:-'root'}
 DB_NAME=${DB_NAME:-'squashtm'}
-DB_PORT=${DB_PORT:-'3306'}
-DB_URL="jdbc:${DB_TYPE}://${DB_HOST}:${DB_PORT}/$DB_NAME"
-
-sleep 10
+# DB_PORT=${DB_PORT:-'3306'}
+# DB_URL="jdbc:${DB_TYPE}://${DB_HOST}:${DB_PORT}/$DB_NAME"
 
 if [[ "${DB_TYPE}" = "mysql" ]]; then
     echo 'Using MysQL'
+    DB_PORT=${DB_PORT:-'3306'}
+    DB_URL="jdbc:${DB_TYPE}://${DB_HOST}:${DB_PORT}/$DB_NAME"
+
+    until nc -zv -w 5 ${DB_HOST} ${DB_PORT}; do echo waiting for mysql; sleep 2; done;
 
     if ! mysql -h $DB_HOST -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME -e "SELECT 1 FROM information_schema.tables WHERE table_schema = '$DB_NAME' AND table_name = 'ISSUE';" | grep 1 ; then
         echo 'Initializing MySQL database'
@@ -118,7 +117,12 @@ if [[ "${DB_TYPE}" = "mysql" ]]; then
     fi
 elif [[ "${DB_TYPE}" = "postgresql" ]]; then
     echo 'Using PostgreSQL'
-    if ! psql postgresql://$DB_USERNAME:$DB_PASSWORD@$DB_HOST:${DB_PORT}/$DB_NAME -c "SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'issue';" | grep 1 ; then
+    DB_PORT=${DB_PORT:-'5432'}
+    DB_URL="jdbc:${DB_TYPE}://${DB_HOST}:${DB_PORT}/$DB_NAME"
+
+    until nc -zv -w 5 ${DB_HOST} ${DB_PORT}; do echo waiting for postgresql; sleep 2; done;
+
+    if ! psql postgresql://$DB_USERNAME:$DB_PASSWORD@$DB_HOST/$DB_NAME -c "SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'issue';" | grep 1 ; then
         echo 'Initializing PostgreSQL database'
         psql postgresql://$DB_USERNAME:$DB_PASSWORD@$DB_HOST:${DB_PORT}/$DB_NAME -f ../database-scripts/postgresql-full-install-version-$SQUASH_TM_VERSION.RELEASE.sql
     else
@@ -270,6 +274,8 @@ echo  "done";
 # exec java ${DAEMON_ARGS}
 
 cd $CATALINA_HOME
+
+export CATALINA_OPTS="-Djava.io.tmpdir=${TMP_DIR} -Dlogging.dir=${LOG_DIR} "
 
 if [[ -v REVERSE_PROXY_HOST ]]; then
 
