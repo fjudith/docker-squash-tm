@@ -3,6 +3,7 @@ services:
   mysql:
     image: amd64/mysql:5
     environment:
+      MYSQL_ROOT_PASSWORD: V3ry1ns3cur3P4ssw0rd
       MYSQL_DATABASE: squashtm
       MYSQL_PASSWORD: V3ry1ns3cur3P4ssw0rd
       MYSQL_USER: squashtm
