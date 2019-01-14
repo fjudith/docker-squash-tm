@@ -23,4 +23,4 @@ services:
     links:
     - postgres:postgres
     ports:
-    - 32760:8080/tcp
+    - 32770:8080/tcp
