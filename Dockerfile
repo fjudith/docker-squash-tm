@@ -12,6 +12,7 @@ RUN apt-get -y update && apt-get -y install \
 	postgresql-client \
 	mysql-client \
 	xmlstarlet \
+	netcat \
 	nano && \
 	apt-get autoremove -y --purge && \
     apt-get clean && \
