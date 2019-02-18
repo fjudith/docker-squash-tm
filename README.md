@@ -7,9 +7,11 @@ Squash TM is the test repository manager found in the open source Squash toolkit
 # Description
 The Dockerfile builds from "Tomcat:8-jre7" see https://hub.docker.com/_/tomcat/
 
-[1.18.5, latest](https://github.com/fjudith/docker-squash-tm/tree/1.18.5/debian)
+[1.19.0](https://github.com/fjudith/docker-squash-tm/tree/1.19.0/debian)
+[1.19.0-alpine, alpine](https://github.com/fjudith/docker-squash-tm/tree/1.19.0/alpine)
+[1.18.5](https://github.com/fjudith/docker-squash-tm/tree/1.18.5/debian)
 [1.18.5-alpine, alpine](https://github.com/fjudith/docker-squash-tm/tree/1.18.5/alpine)
-[1.18.4, latest](https://github.com/fjudith/docker-squash-tm/tree/1.18.4/debian)
+[1.18.4](https://github.com/fjudith/docker-squash-tm/tree/1.18.4/debian)
 [1.18.4-alpine, alpine](https://github.com/fjudith/docker-squash-tm/tree/1.18.4/alpine)
 [1.18.0](https://github.com/fjudith/docker-squash-tm/tree/1.18.0/debian)
 [1.18.0-alpine](https://github.com/fjudith/docker-squash-tm/tree/1.18.0/alpine)
