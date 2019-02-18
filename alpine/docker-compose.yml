@@ -11,7 +11,7 @@ services:
     - /var/lib/mysql
   squash-tm:
     build: ./
-    image: fjudith/squash-tm:1.19.1-alpine
+    image: fjudith/squash-tm:1.19.0-alpine
     environment:
       DB_TYPE: mysql
       DB_HOST: mysql
