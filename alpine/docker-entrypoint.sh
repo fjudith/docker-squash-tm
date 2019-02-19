@@ -21,7 +21,7 @@
 #
 
 # if we're linked to MySQL and thus have credentials already, let's use them
-#set -e
+set -e
 
 function cfg_replace_option {
   grep "$1" "$3" > /dev/null
@@ -40,7 +40,26 @@ function cfg_replace_option {
   fi
 }
 
+
+# Default variables
 SQUASH_TM_CFG_PROPERTIES=/usr/share/squash-tm/conf/squash.tm.cfg.properties
+
+DB_TYPE=${DB_TYPE:-"h2"}                       # Database type, one of h2, mysql, postgresql
+DB_URL=${DB_URL:-"jdbc:h2:../data/squash-tm"}  # Database URL
+DB_USERNAME=${DB_USERNAME:-"sa"}               # Database username
+DB_PASSWORD=${DB_PASSWORD:-"sa"}               # Database password
+DB_NAME=${DB_NAME:-'squashtm'}                 # Database name
+SQUASH_TM_LANGUAGE=${SQUASH_TM_LANGUAGE:-'en'} # UI language
+
+# Directory variables
+TMP_DIR=${TMPDIR:-'/usr/share/squash-tm/tmp'}                  # Tmp and work directory
+BUNDLES_DIR=${BUNDLES_DIR:-'/usr/share/squash-tm/bundles'}     # Bundles directory
+CONF_DIR=${CONF_DIR:-'/usr/share/squash-tm/conf'}              # Configurations directory
+LOG_DIR=${LOG_DIR:-'/usr/share/squash-tm/logs'}                    # Log directory
+TOMCAT_HOME=${TOMCAT_HOME:-'/usr/share/squash-tm/tomcat-home'} # Tomcat home directory
+LUCENE_DIR=${LUCENE_DIR:-'/usr/share/squash-tm/luceneindexes'} # Lucene indexes directory
+PLUGINS_DIR=${PLUGINS_DIR:-'/usr/share/squash-tm/plugins'}     # Plugins directory
+
 
 cd /usr/share/squash-tm/bin
 
@@ -89,13 +108,6 @@ elif [[ -v POSTGRES_ENV_GOSU_VERSION ]]; then
     fi
 fi
 
-DB_TYPE=${DB_TYPE:-'mysql'}
-DB_HOST=${DB_HOST:-'mysql'}
-DB_USERNAME=${DB_USERNAME:-'root'}
-DB_PASSWORD=${DB_PASSWORD:-'root'}
-DB_NAME=${DB_NAME:-'squashtm'}
-# DB_PORT=${DB_PORT:-'3306'}
-# DB_URL="jdbc:${DB_TYPE}://${DB_HOST}:${DB_PORT}/$DB_NAME"
 
 if [[ "${DB_TYPE}" = "mysql" ]]; then
     echo 'Using MysQL'
@@ -106,14 +118,14 @@ if [[ "${DB_TYPE}" = "mysql" ]]; then
 
     if ! mysql -h $DB_HOST -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME -e "SELECT 1 FROM information_schema.tables WHERE table_schema = '$DB_NAME' AND table_name = 'ISSUE';" | grep 1 ; then
         echo 'Initializing MySQL database'
-        mysql -h $DB_HOST -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME < ../database-scripts/mysql-full-install-version-$SQUASH_TM_VERSION.RELEASE.sql
+        mysql -h $DB_HOST -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME < ../database-scripts/mysql-full-install-version-${SQUASH_TM_VERSION: 0:4}.0.RELEASE.sql
     else
         echo 'Database already initialized'
     fi
 
     echo 'Updrading MysQL'
-    if [[ -f "../database-scripts/mysql-upgrade-to-$SQUASH_TM_VERSION.sql" ]]; then
-        mysql -h $DB_HOST -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME < ../database-scripts/mysql-upgrade-to-$SQUASH_TM_VERSION.sql
+    if [[ -f "../database-scripts/mysql-upgrade-to-${SQUASH_TM_VERSION: 0:4}.0.sql" ]]; then
+        mysql -h $DB_HOST -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME < ../database-scripts/mysql-upgrade-to-${SQUASH_TM_VERSION: 0:4}.0.sql
     fi
 elif [[ "${DB_TYPE}" = "postgresql" ]]; then
     echo 'Using PostgreSQL'
@@ -124,24 +136,24 @@ elif [[ "${DB_TYPE}" = "postgresql" ]]; then
 
     if ! psql postgresql://$DB_USERNAME:$DB_PASSWORD@$DB_HOST/$DB_NAME -c "SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'issue';" | grep 1 ; then
         echo 'Initializing PostgreSQL database'
-        psql postgresql://$DB_USERNAME:$DB_PASSWORD@$DB_HOST:${DB_PORT}/$DB_NAME -f ../database-scripts/postgresql-full-install-version-$SQUASH_TM_VERSION.RELEASE.sql
+        psql postgresql://$DB_USERNAME:$DB_PASSWORD@$DB_HOST:${DB_PORT}/$DB_NAME -f ../database-scripts/postgresql-full-install-version-${SQUASH_TM_VERSION: 0:4}.0.RELEASE.sql
     else
         echo 'Database already initialized'
     fi
 
     echo 'Updrading PostgreSQL'
-    if [[ -f "../database-scripts/postgresql-upgrade-to-$SQUASH_TM_VERSION.sql" ]]; then
-        psql postgresql://$DB_USERNAME:$DB_PASSWORD@$DB_HOST:${DB_PORT}/$DB_NAME -f ../database-scripts/postgresql-upgrade-to-$SQUASH_TM_VERSION.sql
+    if [[ -f "../database-scripts/postgresql-upgrade-to-${SQUASH_TM_VERSION: 0:4}.0.sql" ]]; then
+        psql postgresql://$DB_USERNAME:$DB_PASSWORD@$DB_HOST:${DB_PORT}/$DB_NAME -f ../database-scripts/postgresql-upgrade-to-${SQUASH_TM_VERSION: 0:4}.0.sql
     fi
 fi
 
 # Implement database configuration in /usr/share/squash-tm/conf/squash.tm.cfg.properties
 # https://bitbucket.org/nx/squashtest-tm/wiki/WarDeploymentGuide
-cfg_replace_option spring.datasource.url $DB_URL $SQUASH_TM_CFG_PROPERTIES
-cfg_replace_option spring.datasource.username $DB_USERNAME $SQUASH_TM_CFG_PROPERTIES
-cfg_replace_option spring.datasource.password $DB_PASSWORD $SQUASH_TM_CFG_PROPERTIES
-cfg_replace_option squash.path.root /usr/share/squash-tm $SQUASH_TM_CFG_PROPERTIES
-cfg_replace_option spring.profiles.active $DB_TYPE $SQUASH_TM_CFG_PROPERTIES
+# cfg_replace_option spring.datasource.url $DB_URL $SQUASH_TM_CFG_PROPERTIES
+# cfg_replace_option spring.datasource.username $DB_USERNAME $SQUASH_TM_CFG_PROPERTIES
+# cfg_replace_option spring.datasource.password $DB_PASSWORD $SQUASH_TM_CFG_PROPERTIES
+# cfg_replace_option squash.path.root /usr/share/squash-tm $SQUASH_TM_CFG_PROPERTIES
+# cfg_replace_option spring.profiles.active $DB_TYPE $SQUASH_TM_CFG_PROPERTIES
 
 # Deploy webapp's context
 # https://bitbucket.org/nx/squashtest-tm/wiki/WarDeploymentGuide
@@ -198,49 +210,6 @@ if [[ "$LDAP_ENABLED" = "true" ]]; then
     fi
 fi
 
-#That script will :
-#- check that the java environnement exists,
-#- the version is adequate,
-#- will run the application
-
-# Default variables
-JAR_NAME="squash-tm.war"  # Java main library
-HTTP_PORT=${HTTP_PORT:-8080}               # Port for HTTP connector (default 8080; disable with -1)
-# Directory variables
-TMP_DIR=../tmp                             # Tmp and work directory
-BUNDLES_DIR=../bundles                     # Bundles directory
-CONF_DIR=../conf                           # Configurations directory
-LOG_DIR=../logs                            # Log directory
-TOMCAT_HOME=../tomcat-home                 # Tomcat home directory
-LUCENE_DIR=../luceneindexes                # Lucene indexes directory
-PLUGINS_DIR=../plugins                     # Plugins directory
-# DataBase parameters
-DB_TYPE=${DB_TYPE:-"h2"}                       # Database type, one of h2, mysql, postgresql
-DB_URL=${DB_URL:-"jdbc:h2:../data/squash-tm"}  # DataBase URL
-DB_USERNAME=${DB_USERNAME:-"sa"}               # DataBase username
-DB_PASSWORD=${DB_PASSWORD:-"sa"}               # DataBase password
-## Do not configure a third digit here
-REQUIRED_VERSION=1.7
-# Extra Java args
-JAVA_ARGS=${JAVA_ARGS:-"-Xms128m -Xmx512m -server"}
-
-# Tests if java exists
-echo -n "$0 : checking java environment... ";
-
-java_exists=`java -version 2>&1`;
-
-if [ $? -eq 127 ]
-then
-    echo;
-    echo "$0 : Error : java not found. Please ensure that \$JAVA_HOME points to the correct directory.";
-    echo "If \$JAVA_HOME is correctly set, try exporting that variable and run that script again. Eg : ";
-    echo "\$ export \$JAVA_HOME";
-    echo "\$ ./$0";
-    exit -1;
-fi
-
-echo "done";
-
 # Create logs , tmp and plugins directories if necessary
 if [ ! -e "$LOG_DIR" ]; then
     mkdir $LOG_DIR
@@ -250,26 +219,22 @@ if [ ! -e "$TMP_DIR" ]; then
     mkdir $TMP_DIR
 fi
 
-# Tests if the version is high enough
-echo -n "checking version... ";
-
-NUMERIC_REQUIRED_VERSION=`echo $REQUIRED_VERSION |sed 's/\./0/g'`;
-java_version=`echo $java_exists | grep version |cut -d " " -f 3  |sed 's/\"//g' | cut -d "." -f 1,2 | sed 's/\./0/g'`;
-
-if [ $java_version -lt $NUMERIC_REQUIRED_VERSION ]
-then
-    echo;
-    echo "$0 : Error : your JRE does not meet the requirements. Please install a new JRE, required version ${REQUIRED_VERSION}.";
-    exit -2;
-fi
-
-echo  "done";
-
 # Let's go !
 #echo "$0 : starting Squash TM... ";
 
-#export _JAVA_OPTIONS="-Dspring.datasource.url=${DB_URL} -Dspring.datasource.username=${DB_USERNAME} -Dspring.datasource.password=${DB_PASSWORD} -Duser.language=${SQUASH_TM_LANGUAGE}"
-#DAEMON_ARGS="${JAVA_ARGS} -Djava.io.tmpdir=${TMP_DIR} -Dlogging.dir=${LOG_DIR} -jar ${BUNDLES_DIR}/${JAR_NAME} --spring.profiles.active=${DB_TYPE} --spring.config.location=${CONF_DIR}/squash.tm.cfg.properties --logging.config=${CONF_DIR}/log4j.properties --squash.path.bundles-path=${BUNDLES_DIR} --squash.path.plugins-path=${PLUGINS_DIR} --hibernate.search.default.indexBase=${LUCENE_DIR} --server.port=${HTTP_PORT} --server.tomcat.basedir=${TOMCAT_HOME} "
+export JAVA_OPTS="
+  -Xmx1024m -XX:MaxPermSize=256m
+  -Dspring.datasource.url=${DB_URL}
+  -Dspring.datasource.username=${DB_USERNAME}
+  -Dspring.datasource.password=${DB_PASSWORD}
+  -Duser.language=${SQUASH_TM_LANGUAGE}
+  -Djava.io.tmpdir=${TMP_DIR}
+  -Dlogging.dir=${LOG_DIR}
+  -Dspring.profiles.active=${DB_TYPE}
+  -Dsquash.path.bundles-path=${BUNDLES_DIR} 
+  -Dsquash.path.plugins-path=${PLUGINS_DIR} 
+  -Dhibernate.search.default.indexBase=${LUCENE_DIR}  
+  -Dserver.tomcat.basedir=${TOMCAT_HOME} "
 
 # exec java ${DAEMON_ARGS}
 
