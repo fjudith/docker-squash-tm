@@ -113,7 +113,10 @@ the following environment variables enable the support of LDAP
 Database is created by the database container and automatically populated by the application container on first run.
 
 ```bash
-docker run -it -d --name squash-tm-pg \
+docker network create squash-tm
+
+docker run -it -d --name postgres \
+--network=squash-tm \
 --restart=always \
 -e POSTGRES_USER=squashtm \
 -e POSTGRES_PASSWORD=Ch4ng3M3 \
@@ -124,8 +127,13 @@ postgres
 sleep 10
 
 docker run -it -d --name=squash-tm \
---link squash-tm-pg:postgres \
+--network=squash-tm \
 --restart=always \
+-e DB_TYPE: postgresql \
+-e DB_HOST: postgres \
+-e DB_NAME: squashtm \
+-e DB_USERNAME: squashtm \
+-e DB_PASSWORD: V3ry1ns3cur3P4ssw0rd \
 -p 32760:8080 \
 fjudith/squash-tm
 ```
@@ -137,7 +145,10 @@ Wait 2-3 minutes the time for Squash-TM to initialize. then login to http://loca
 Database is created by the database container and automatically populated by the application container on first run.
 
 ```bash
-docker run -it -d --name squash-tm-md \
+docker network create squash-tm
+
+docker run -it -d --name mysql \
+--network=squash-tm \
 -e MYSQL_ROOT_PASSWORD=Ch4ng3M3 \
 -e MYSQL_USER=squashtm \
 -e MYSQL_PASSWORD=Ch4ng3M3 \
@@ -148,7 +159,12 @@ mariadb --character-set-server=utf8_bin --collation-server=utf8_bin
 sleep 10
 
 docker run -it -d --name=squash-tm \
---link squash-tm-md:mysql \
+--network=squash-tm \
+-e DB_TYPE: mysql \
+-e DB_HOST: mysql \
+-e DB_NAME: squashtm \
+-e DB_USERNAME: squashtm \
+-e DB_PASSWORD: V3ry1ns3cur3P4ssw0rd \
 -p 32760:8080 \
 fjudith/squash-tm
 ```
@@ -157,60 +173,8 @@ Wait 2-3 minutes the time for Squash-TM to initialize. then login to http://loca
 
 ## Docker-Compose
 
-The following example enables Postgres database and Reverse-Proxy support for SSL offloading.
-
-```
-squash-tm-pg:
-  environment:
-    POSTGRES_DB: squashtm
-    POSTGRES_PASSWORD: Ch4ng3M3
-    POSTGRES_USER: squashtm
-  image: postgres
-  volumes:
-  - squash-tm-db:/var/lib/postgresql
-
-squash-tm:
-  environment:
-    REVERSE_PROXY_HOST: squashtm.example.com
-    REVERSE_PROXY_PORT: 443
-    REVERSE_PROXY_PROTOCOL: https
-  ports:
-  - 32760:8080/tcp
-  image: fjudith/squash-tm
-  links:
-  - squash-tm-pg:postgres
-  volumes:
-  - squash-tm-tmp:/usr/share/squash-tm/tmp
-  - squash-tm-bundles:/usr/share/squash-tm/bundles
-  - squash-tm-logs:/usr/share/squash-tm/logs
-  - squash-tm-jettyhome:/usr/share/squash-tm/jettyhome
-  - squash-tm-luceneindexes:/usr/share/squash-tm/luceneindexes
-  - squash-tm-plugins:/usr/share/squash-tm/plugins
-```
-
-## Cloud Foundry manifest.yml
-
-```
----
-applications:
-- name: squashtm
-  docker:
-    image: fjudith/squash-tm
-  instances: 1
-  memory: 1G
-  disk_quota: 1G
-  env: 
-    DB_HOST: <database-service-host>
-    DB_PORT: <database-service-port>
-    DB_TYPE: <database-type>
-    DB_NAME: <database-name>
-    DB_USERNAME: <username>
-    DB_PASSWORD: <password>
-    REVERSE_PROXY_HOST: squashtm.your-cf.domain
-    REVERSE_PROXY_PORT: 443
-    REVERSE_PROXY_PROTOCOL: https
-```
-More info: https://docs.cloudfoundry.org/devguide/deploy-apps/manifest.html#docker 
+* **Alpine example**: <https://raw.githubusercontent.com/fjudith/docker-squash-tm/master/alpine/docker-compose.yml>
+* **Debian example**: <https://raw.githubusercontent.com/fjudith/docker-squash-tm/master/debian/docker-compose.yml>
 
 ## References
 
