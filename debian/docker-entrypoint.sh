@@ -42,6 +42,22 @@ function cfg_replace_option {
 
 SQUASH_TM_CFG_PROPERTIES=/usr/share/squash-tm/conf/squash.tm.cfg.properties
 
+ROOT_DIR=${ROOT_DIR:-'/usr/share/squash-tm'}
+CONFIG_FILE=${CONFIG_FILE:-"${ROOT_DIR}/conf/squash.tm.cfg.properties"}
+BUNDLES_DIR=${BUNDLES_DIR:-"${ROOT_DIR}/bundles"}       # Bundles directory
+PLUGINS_DIR=${PLUGINS_DIR:-"${ROOT_DIR}/plugins"}
+LANGUAGE_DIR=${LANGUAGE_DIR:-"${ROOT_DIR}/conf/lang"}
+TMP_DIR=${TMP_DIR:-"${ROOT_DIR}/tmp"}
+LOG_DIR=${LOG_DIR:-"${ROOT_DIR}/log"}
+INDEX_DIR${INDEX_DIR:-"${ROOT_DIR}/luceneindexes"}
+
+DB_TYPE=${DB_TYPE:-'h2'}                       # Database type, one of h2, mysql, postgresql
+DB_URL=${DB_URL:-"jdbc:h2:${ROOT_DIR}/data/squash-tm"}  # Database URL
+DB_USERNAME=${DB_USERNAME:-'sa'}               # Database username
+DB_PASSWORD=${DB_PASSWORD:-'sa'}               # Database password
+DB_NAME=${DB_NAME:-'squashtm'}                 # Database name
+SQUASH_TM_LANGUAGE=${SQUASH_TM_LANGUAGE:-'en'} # UI language
+
 cd /usr/share/squash-tm/bin
 
 # if we're linked to MySQL and thus have credentials already, let's use them
@@ -88,14 +104,6 @@ elif [[ -v POSTGRES_ENV_GOSU_VERSION ]]; then
         exit 1
     fi
 fi
-
-DB_TYPE=${DB_TYPE:-'mysql'}
-DB_HOST=${DB_HOST:-'mysql'}
-DB_USERNAME=${DB_USERNAME:-'root'}
-DB_PASSWORD=${DB_PASSWORD:-'root'}
-DB_NAME=${DB_NAME:-'squashtm'}
-# DB_PORT=${DB_PORT:-'3306'}
-# DB_URL="jdbc:${DB_TYPE}://${DB_HOST}:${DB_PORT}/$DB_NAME"
 
 if [[ "${DB_TYPE}" = "mysql" ]]; then
     echo 'Using MysQL'
@@ -198,48 +206,24 @@ if [[ "$LDAP_ENABLED" = "true" ]]; then
     fi
 fi
 
-#That script will :
-#- check that the java environnement exists,
-#- the version is adequate,
-#- will run the application
+export JAVA_OPTS="
+  -Xmx1024m -XX:MaxPermSize=256m
+  -Dsquash.path.root=${ROOT_DIR}
+  -Dsquash.path.bundles-path=${BUNDLES_DIR}
+  -Dsquash.path.plugins-path=${PLUGINS_DIR}
+  -Dsquash.path.languages-path=${LANGUAGE_DIR}
+  -Dspring.config.location=${CONFIG_FILE}
+  -Dspring.profiles.active=${DB_TYPE}
+  -Dspring.datasource.url=${DB_URL}
+  -Dspring.datasource.username=${DB_USERNAME}
+  -Dspring.datasource.password=${DB_PASSWORD}
+  -Dspring.profiles.active=${DB_TYPE}
+  -Dspring.jpa.properties.hibernate.search.default.indexBase=${INDEX_DIR}
+  -Djava.io.tmpdir=${TMP_DIR}
+  -Dlogging.dir=${LOG_DIR}
+  -Duser.language=${SQUASH_TM_LANGUAGE}
+"
 
-# Default variables
-JAR_NAME="squash-tm.war"  # Java main library
-HTTP_PORT=${HTTP_PORT:-8080}               # Port for HTTP connector (default 8080; disable with -1)
-# Directory variables
-TMP_DIR=../tmp                             # Tmp and work directory
-BUNDLES_DIR=../bundles                     # Bundles directory
-CONF_DIR=../conf                           # Configurations directory
-LOG_DIR=../logs                            # Log directory
-TOMCAT_HOME=../tomcat-home                 # Tomcat home directory
-LUCENE_DIR=../luceneindexes                # Lucene indexes directory
-PLUGINS_DIR=../plugins                     # Plugins directory
-# DataBase parameters
-DB_TYPE=${DB_TYPE:-"h2"}                       # Database type, one of h2, mysql, postgresql
-DB_URL=${DB_URL:-"jdbc:h2:../data/squash-tm"}  # DataBase URL
-DB_USERNAME=${DB_USERNAME:-"sa"}               # DataBase username
-DB_PASSWORD=${DB_PASSWORD:-"sa"}               # DataBase password
-## Do not configure a third digit here
-REQUIRED_VERSION=1.7
-# Extra Java args
-JAVA_ARGS=${JAVA_ARGS:-"-Xms128m -Xmx512m -server"}
-
-# Tests if java exists
-echo -n "$0 : checking java environment... ";
-
-java_exists=`java -version 2>&1`;
-
-if [ $? -eq 127 ]
-then
-    echo;
-    echo "$0 : Error : java not found. Please ensure that \$JAVA_HOME points to the correct directory.";
-    echo "If \$JAVA_HOME is correctly set, try exporting that variable and run that script again. Eg : ";
-    echo "\$ export \$JAVA_HOME";
-    echo "\$ ./$0";
-    exit -1;
-fi
-
-echo "done";
 
 # Create logs , tmp and plugins directories if necessary
 if [ ! -e "$LOG_DIR" ]; then
@@ -249,29 +233,6 @@ fi
 if [ ! -e "$TMP_DIR" ]; then
     mkdir $TMP_DIR
 fi
-
-# Tests if the version is high enough
-echo -n "checking version... ";
-
-NUMERIC_REQUIRED_VERSION=`echo $REQUIRED_VERSION |sed 's/\./0/g'`;
-java_version=`echo $java_exists | grep version |cut -d " " -f 3  |sed 's/\"//g' | cut -d "." -f 1,2 | sed 's/\./0/g'`;
-
-if [ $java_version -lt $NUMERIC_REQUIRED_VERSION ]
-then
-    echo;
-    echo "$0 : Error : your JRE does not meet the requirements. Please install a new JRE, required version ${REQUIRED_VERSION}.";
-    exit -2;
-fi
-
-echo  "done";
-
-# Let's go !
-#echo "$0 : starting Squash TM... ";
-
-#export _JAVA_OPTIONS="-Dspring.datasource.url=${DB_URL} -Dspring.datasource.username=${DB_USERNAME} -Dspring.datasource.password=${DB_PASSWORD} -Duser.language=${SQUASH_TM_LANGUAGE}"
-#DAEMON_ARGS="${JAVA_ARGS} -Djava.io.tmpdir=${TMP_DIR} -Dlogging.dir=${LOG_DIR} -jar ${BUNDLES_DIR}/${JAR_NAME} --spring.profiles.active=${DB_TYPE} --spring.config.location=${CONF_DIR}/squash.tm.cfg.properties --logging.config=${CONF_DIR}/log4j.properties --squash.path.bundles-path=${BUNDLES_DIR} --squash.path.plugins-path=${PLUGINS_DIR} --hibernate.search.default.indexBase=${LUCENE_DIR} --server.port=${HTTP_PORT} --server.tomcat.basedir=${TOMCAT_HOME} "
-
-# exec java ${DAEMON_ARGS}
 
 cd $CATALINA_HOME
 
