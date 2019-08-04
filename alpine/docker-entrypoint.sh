@@ -21,7 +21,7 @@
 #
 
 # if we're linked to MySQL and thus have credentials already, let's use them
-#set -e
+# set -e
 
 function cfg_replace_option {
   grep "$1" "$3" > /dev/null
@@ -106,6 +106,7 @@ if [[ "${DB_TYPE}" = "mysql" ]]; then
 
     if ! mysql -h $DB_HOST -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME -e "SELECT 1 FROM information_schema.tables WHERE table_schema = '$DB_NAME' AND table_name = 'ISSUE';" | grep 1 ; then
         echo 'Initializing MySQL database'
+        mysql -h $DB_HOST -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME -e "SELECT @@sql_mode;"
         mysql -h $DB_HOST -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME < ../database-scripts/mysql-full-install-version-$SQUASH_TM_VERSION.RELEASE.sql
     else
         echo 'Database already initialized'

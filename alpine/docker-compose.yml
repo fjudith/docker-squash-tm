@@ -1,4 +1,9 @@
-version: '2'
+version: '3'
+
+volumes:
+  squash-tm-db:
+  squash-tm-plugins:
+
 services:
   mysql:
     image: amd64/mysql:5
@@ -8,7 +13,10 @@ services:
       MYSQL_PASSWORD: V3ry1ns3cur3P4ssw0rd
       MYSQL_USER: squashtm
     volumes:
-    - /var/lib/mysql
+      - squash-tm-db:/var/lib/mysql
+    command:
+      - --sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+  
   squash-tm:
     build: ./
     image: fjudith/squash-tm:1.18.5-alpine
@@ -20,8 +28,7 @@ services:
       DB_PASSWORD: V3ry1ns3cur3P4ssw0rd
       #DB_PORT: 5432
     volumes:
-    - /usr/share/squash-tm/plugins
-    links:
-    - mysql:mysql
+      - squash-tm-plugins:/usr/share/squash-tm/plugins
     ports:
-    - 32770:8080/tcp
+      - 32770:8080/tcp
+
