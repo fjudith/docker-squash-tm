@@ -21,7 +21,7 @@
 #
 
 # if we're linked to MySQL and thus have credentials already, let's use them
-set -e
+# set -e
 
 function cfg_replace_option {
   grep "$1" "$3" > /dev/null
@@ -118,7 +118,8 @@ if [[ "${DB_TYPE}" = "mysql" ]]; then
 
     if ! mysql -h $DB_HOST -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME -e "SELECT 1 FROM information_schema.tables WHERE table_schema = '$DB_NAME' AND table_name = 'ISSUE';" | grep 1 ; then
         echo 'Initializing MySQL database'
-        mysql -h $DB_HOST -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME < ../database-scripts/mysql-full-install-version-${SQUASH_TM_VERSION: 0:4}.0.RELEASE.sql
+        mysql -h $DB_HOST -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME -e "SELECT @@sql_mode;"
+        mysql -h $DB_HOST -u $DB_USERNAME -p$DB_PASSWORD $DB_NAME < ../database-scripts/mysql-full-install-version-$SQUASH_TM_VERSION.RELEASE.sql
     else
         echo 'Database already initialized'
     fi
@@ -149,11 +150,12 @@ fi
 
 # Implement database configuration in /usr/share/squash-tm/conf/squash.tm.cfg.properties
 # https://bitbucket.org/nx/squashtest-tm/wiki/WarDeploymentGuide
-# cfg_replace_option spring.datasource.url $DB_URL $SQUASH_TM_CFG_PROPERTIES
-# cfg_replace_option spring.datasource.username $DB_USERNAME $SQUASH_TM_CFG_PROPERTIES
-# cfg_replace_option spring.datasource.password $DB_PASSWORD $SQUASH_TM_CFG_PROPERTIES
-# cfg_replace_option squash.path.root /usr/share/squash-tm $SQUASH_TM_CFG_PROPERTIES
-# cfg_replace_option spring.profiles.active $DB_TYPE $SQUASH_TM_CFG_PROPERTIES
+cfg_replace_option spring.datasource.url $DB_URL $SQUASH_TM_CFG_PROPERTIES
+cfg_replace_option spring.datasource.username $DB_USERNAME $SQUASH_TM_CFG_PROPERTIES
+cfg_replace_option spring.datasource.password $DB_PASSWORD $SQUASH_TM_CFG_PROPERTIES
+cfg_replace_option squash.path.root /usr/share/squash-tm $SQUASH_TM_CFG_PROPERTIES
+cfg_replace_option spring.profiles.active $DB_TYPE $SQUASH_TM_CFG_PROPERTIES
+cfg_replace_option squash.path.plugins-path $PLUGINS_DIR $SQUASH_TM_CFG_PROPERTIES
 
 # Deploy webapp's context
 # https://bitbucket.org/nx/squashtest-tm/wiki/WarDeploymentGuide

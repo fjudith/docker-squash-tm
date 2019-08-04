@@ -4,6 +4,7 @@
   <Environment name="spring.profiles.active" value="@@DB_TYPE@@" type="java.lang.String" override="false"/>
   <Environment name="spring.datasource.url" value="@@DB_URL@@" type="java.lang.String" override="false"/>
   <Environment name="squash.path.root" value="/usr/share/squash-tm" type="java.lang.String" override="false"/>
+  <Environment name="squash.path.plugins-path" value="/usr/share/squash-tm/plugins" type="java.lang.String" override="false"/>
   <Resources>
     <PreResources className="org.apache.catalina.webresources.DirResourceSet" 
                   base="/usr/share/squash-tm/plugins"
