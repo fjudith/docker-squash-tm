@@ -7,7 +7,7 @@ ENV TERM='xterm'
 ENV SQUASH_TM_VERSION='1.19.0'
 ENV SQUASH_TM_URL="http://repo.squashtest.org/distribution/squash-tm-${SQUASH_TM_VERSION}.RELEASE.tar.gz"
 ENV CATALINA_HOME='/usr/local/tomcat'
-ENV JAVA_OPTS="-Xmx1024m -XX:MaxPermSize=256m"
+
 
 RUN apt-get -y update && apt-get -y install \
 	postgresql-client \
